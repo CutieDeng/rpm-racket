@@ -6,9 +6,12 @@ set -euo pipefail
 
 PACKAGE_NAME='racket9'
 PACKAGE_VERSION='9.2.1.1'
+PACKAGE_SOURCE_VERSION='9.2.1'
 PACKAGE_RELEASE='1'
 DEFAULT_PREFIX='/usr'
-PAYLOAD_SOURCE_NAME='racket9-9.2.1.1-payload.tar.gz'
+SOURCE_ARCHIVE_NAME='racket-minimal-9.2.1-src.tgz'
+DEFAULT_SOURCE_URL='https://github.com/CutieDeng/racket/releases/download/v9.2.1/racket-minimal-9.2.1-src.tgz'
+SOURCE_SHA256='b9c621e5c91822181cff1b1af8813a5abd3e89795089171552dac0f441222bbd'
 FILE_LIST_SOURCE_NAME='racket9.files'
 SPEC_NAME='racket9.spec'
 
@@ -181,42 +184,61 @@ prepare_rpmbuild_tree() {
   fi
 }
 
-stage_install_root() {
+validate_source_archive() {
   local dry_run="$1"
-  local skip_build="$2"
-  local racket_root="$3"
-  local make_dir="$4"
-  local install_root="$5"
-  local jobs="$6"
-  shift 6
-  local make_args=("$@")
-  require_absolute_path "$install_root" "install root"
-  if [ "$skip_build" = 1 ]; then
-    require_nonempty_dir "$install_root$PREFIX"
+  local archive="$2"
+  local expected_root="racket-$PACKAGE_SOURCE_VERSION"
+  if [ "$dry_run" = 1 ]; then
+    printf 'Would validate source archive: %s\n' "$archive"
     return
   fi
-  require_dir "$racket_root/racket/src"
-  require_dir "$racket_root/racket/collects"
-  require_file "$racket_root/racket/src/version/racket_version.h"
-  require_file "$make_dir/Makefile"
-  reset_output_dir "$dry_run" "$install_root"
-  run_cmd "$dry_run" make -C "$make_dir" unix-style \
-    "PREFIX=$PREFIX" "DESTDIR=$install_root" "JOBS=$jobs" "${make_args[@]}"
+  require_nonempty_file "$archive"
+  tar -tzf "$archive" "$expected_root/src/configure" >/dev/null \
+    || die "source archive missing $expected_root/src/configure: $archive"
+  tar -tzf "$archive" "$expected_root/collects/racket/main.rkt" >/dev/null \
+    || die "source archive missing $expected_root/collects/racket/main.rkt: $archive"
 }
 
-create_payload_sources() {
+verify_source_sha256() {
   local dry_run="$1"
-  local install_root="$2"
-  local sources_dir="$3"
-  local payload_path="$sources_dir/$PAYLOAD_SOURCE_NAME"
-  local manifest_path="$sources_dir/$FILE_LIST_SOURCE_NAME"
-  if [ "$dry_run" = 0 ]; then
-    mkdir -p "$sources_dir"
+  local archive="$2"
+  if [ -z "$SOURCE_SHA256" ]; then
+    printf 'No generated source sha256 is pinned; skipping source sha256 check.\n'
+    return
   fi
-  run_cmd "$dry_run" tar -C "$install_root" -czf "$payload_path" .
   if [ "$dry_run" = 1 ]; then
-    printf 'Would generate RPM file manifest: %s\n' "$manifest_path"
-  else
-    generate_file_list "$install_root" "$manifest_path"
+    printf 'Would verify source sha256: %s\n' "$SOURCE_SHA256"
+    return
   fi
+  local actual
+  if command -v sha256sum >/dev/null 2>&1; then
+    actual=$(sha256sum "$archive" | cut -d ' ' -f 1)
+  elif command -v shasum >/dev/null 2>&1; then
+    actual=$(shasum -a 256 "$archive" | cut -d ' ' -f 1)
+  else
+    die "executable not found in PATH: sha256sum or shasum"
+  fi
+  [ "$actual" = "$SOURCE_SHA256" ] \
+    || die "source sha256 mismatch: expected $SOURCE_SHA256 but got $actual"
+}
+
+prepare_source_archive() {
+  local dry_run="$1"
+  local source_archive="$2"
+  local source_url="$3"
+  local dest="$4"
+  require_absolute_path "$dest" "source archive destination"
+  if [ "$dry_run" = 0 ]; then
+    mkdir -p "$(dirname "$dest")"
+  fi
+  if [ -n "$source_archive" ]; then
+    require_nonempty_file "$source_archive"
+    run_cmd "$dry_run" cp "$source_archive" "$dest"
+  else
+    [ -n "$source_url" ] || die "source URL is empty"
+    maybe_require_exe "$dry_run" curl
+    run_cmd "$dry_run" curl -fL --retry 3 --output "$dest" "$source_url"
+  fi
+  validate_source_archive "$dry_run" "$dest"
+  verify_source_sha256 "$dry_run" "$dest"
 }

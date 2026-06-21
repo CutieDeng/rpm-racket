@@ -11,11 +11,12 @@ configuration and regenerate instead.
 ## Layout
 
 - `SPECS/racket9.spec`: RPM build definition.
-- `SOURCES/.gitkeep`: source placeholder; build scripts create payload sources
-  under their explicit work directory.
+- `SOURCES/.gitkeep`: source placeholder; build scripts copy or download the
+  stable source archive into their explicit work directory.
 - `scripts/rpm-common.sh`: shared safety checks and staging helpers.
 - `scripts/build-rpm.sh`: builds a binary RPM from the generated spec.
-- `scripts/build-srpm.sh`: builds a source RPM with the staged payload model.
+- `scripts/build-srpm.sh`: builds a source RPM from the same stable source
+  archive.
 - `scripts/verify-rpm.sh`: validates RPM name, metadata, arch, and payload
   ownership boundaries.
 
@@ -33,22 +34,43 @@ racket package-racket.rkt \
 
 ## Build
 
-Build a binary RPM on a target Linux host:
+Build a binary RPM on a target Linux host from the generated GitHub Release
+source URL:
 
 ```sh
 scripts/build-rpm.sh \
-  --racket-root /path/to/clean-racket.git \
   --artifact-dir /path/to/artifacts \
   --work-dir /path/to/work \
   --rpm-arch arm64 \
   --prefix /usr
 ```
 
-Build the matching SRPM:
+Use a local source archive for offline or pinned local builds:
+
+```sh
+scripts/build-rpm.sh \
+  --source-archive /path/to/racket-minimal-9.2.1-src.tgz \
+  --artifact-dir /path/to/artifacts \
+  --work-dir /path/to/work \
+  --rpm-arch arm64 \
+  --prefix /usr
+```
+
+Build the matching SRPM from the generated GitHub Release source URL:
 
 ```sh
 scripts/build-srpm.sh \
-  --racket-root /path/to/clean-racket.git \
+  --artifact-dir /path/to/artifacts \
+  --work-dir /path/to/work \
+  --rpm-arch arm64 \
+  --prefix /usr
+```
+
+Use a local source archive for the matching SRPM:
+
+```sh
+scripts/build-srpm.sh \
+  --source-archive /path/to/racket-minimal-9.2.1-src.tgz \
   --artifact-dir /path/to/artifacts \
   --work-dir /path/to/work \
   --rpm-arch arm64 \
