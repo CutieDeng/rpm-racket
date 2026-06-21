@@ -100,8 +100,8 @@ normalize_arch() {
 
 validate_rpm_system() {
   case "$1" in
-    el9|fc40|openeuler|openeuler2403) ;;
-    *) die "rpm system must be el9, fc40, openeuler, or openeuler2403: $1" ;;
+    el9|fc40|openeuler2203|openeuler2403) ;;
+    *) die "rpm system must be el9, fc40, openeuler2203, or openeuler2403: $1" ;;
   esac
 }
 

@@ -62,6 +62,17 @@ scripts/build-rpm.sh \
   --prefix /usr
 ```
 
+Supported RPM systems are `el9`, `fc40`, `openeuler2203`, and
+`openeuler2403`. The generic `openeuler` value is intentionally rejected for
+production artifacts. Common explicit target examples:
+
+```sh
+--rpm-system el9 --rpm-release 1 --rpm-arch x86_64
+--rpm-system fc40 --rpm-release 1 --rpm-arch x86_64
+--rpm-system openeuler2203 --rpm-release 1 --rpm-arch arm64
+--rpm-system openeuler2403 --rpm-release 1 --rpm-arch arm64
+```
+
 Build the matching SRPM from the generated GitHub Release source URL:
 
 ```sh
