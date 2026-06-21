@@ -28,6 +28,8 @@ Run from `package-racket` to overwrite the SPEC and scripts:
 racket package-racket.rkt \
   --target rpm-spec \
   --prefix /usr \
+  --rpm-system openeuler2403 \
+  --rpm-release 1 \
   --rpm-arch arm64 \
   --rpm-repo-config /Users/cutiedeng/Y2026/M06/D21/package-racket/rpm-repo-config.rktd
 ```
@@ -41,6 +43,8 @@ source URL:
 scripts/build-rpm.sh \
   --artifact-dir /path/to/artifacts \
   --work-dir /path/to/work \
+  --rpm-system openeuler2403 \
+  --rpm-release 1 \
   --rpm-arch arm64 \
   --prefix /usr
 ```
@@ -52,6 +56,8 @@ scripts/build-rpm.sh \
   --source-archive /path/to/racket-minimal-9.2.1-src.tgz \
   --artifact-dir /path/to/artifacts \
   --work-dir /path/to/work \
+  --rpm-system openeuler2403 \
+  --rpm-release 1 \
   --rpm-arch arm64 \
   --prefix /usr
 ```
@@ -62,6 +68,8 @@ Build the matching SRPM from the generated GitHub Release source URL:
 scripts/build-srpm.sh \
   --artifact-dir /path/to/artifacts \
   --work-dir /path/to/work \
+  --rpm-system openeuler2403 \
+  --rpm-release 1 \
   --rpm-arch arm64 \
   --prefix /usr
 ```
@@ -73,6 +81,8 @@ scripts/build-srpm.sh \
   --source-archive /path/to/racket-minimal-9.2.1-src.tgz \
   --artifact-dir /path/to/artifacts \
   --work-dir /path/to/work \
+  --rpm-system openeuler2403 \
+  --rpm-release 1 \
   --rpm-arch arm64 \
   --prefix /usr
 ```
@@ -81,6 +91,8 @@ Validate an existing RPM:
 
 ```sh
 scripts/verify-rpm.sh \
-  --rpm /path/to/artifacts/racket9-9.2.1-1.aarch64.rpm \
+  --rpm /path/to/artifacts/racket9-9.2.1-1.openeuler2403.aarch64.rpm \
+  --rpm-system openeuler2403 \
+  --rpm-release 1 \
   --rpm-arch arm64
 ```

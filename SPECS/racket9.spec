@@ -1,6 +1,8 @@
 Name: racket9
 Version: 9.2.1
-Release: 1
+%{!?package_system:%global package_system openeuler2403}
+%{!?package_release:%global package_release 1}
+Release: %{package_release}.%{package_system}
 Summary: Racket programming language
 License: MIT OR Apache-2.0
 URL: https://racket-lang.org/

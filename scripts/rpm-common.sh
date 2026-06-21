@@ -7,7 +7,8 @@ set -euo pipefail
 PACKAGE_NAME='racket9'
 PACKAGE_VERSION='9.2.1'
 PACKAGE_SOURCE_VERSION='9.2.1'
-PACKAGE_RELEASE='1'
+DEFAULT_RPM_SYSTEM='openeuler2403'
+DEFAULT_RPM_RELEASE='1'
 DEFAULT_PREFIX='/usr'
 SOURCE_ARCHIVE_NAME='racket-minimal-9.2.1-src.tgz'
 DEFAULT_SOURCE_URL='https://github.com/CutieDeng/racket/releases/download/v9.2.1/racket-minimal-9.2.1-src.tgz'
@@ -97,13 +98,43 @@ normalize_arch() {
   esac
 }
 
+validate_rpm_system() {
+  case "$1" in
+    el9|fc40|openeuler|openeuler2403) ;;
+    *) die "rpm system must be el9, fc40, openeuler, or openeuler2403: $1" ;;
+  esac
+}
+
+validate_rpm_release() {
+  local release="$1"
+  [ -n "$release" ] || die "rpm release is required"
+  case "$release" in
+    *.*) die "rpm release must not contain . because system is appended separately: $release" ;;
+    [0-9]*) ;;
+    *) die "rpm release must start with a digit: $release" ;;
+  esac
+  case "$release" in
+    *[!A-Za-z0-9_+~-]*) die "rpm release contains unsupported characters: $release" ;;
+  esac
+}
+
+rpm_full_release() {
+  local release="$1"
+  local system="$2"
+  printf '%s.%s\n' "$release" "$system"
+}
+
 rpm_name_for_arch() {
   local arch="$1"
-  printf '%s-%s-%s.%s.rpm\n' "$PACKAGE_NAME" "$PACKAGE_VERSION" "$PACKAGE_RELEASE" "$arch"
+  local release="$2"
+  local system="$3"
+  printf '%s-%s-%s.%s.rpm\n' "$PACKAGE_NAME" "$PACKAGE_VERSION" "$(rpm_full_release "$release" "$system")" "$arch"
 }
 
 srpm_name() {
-  printf '%s-%s-%s.src.rpm\n' "$PACKAGE_NAME" "$PACKAGE_VERSION" "$PACKAGE_RELEASE"
+  local release="$1"
+  local system="$2"
+  printf '%s-%s-%s.src.rpm\n' "$PACKAGE_NAME" "$PACKAGE_VERSION" "$(rpm_full_release "$release" "$system")"
 }
 
 reset_output_dir() {
