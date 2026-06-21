@@ -8,11 +8,26 @@ Source0: https://github.com/CutieDeng/racket/releases/download/v9.2.1/racket-min
 AutoReqProv: no
 %global __brp_compress %{nil}
 %global package_prefix /usr
+%global source_sha256 b9c621e5c91822181cff1b1af8813a5abd3e89795089171552dac0f441222bbd
 
 %description
 Racket packaged from a stable source release archive.
 
 %prep
+if [ -n "%{source_sha256}" ]; then
+  if command -v sha256sum >/dev/null 2>&1; then
+    actual=$(sha256sum %{SOURCE0} | cut -d ' ' -f 1)
+  elif command -v shasum >/dev/null 2>&1; then
+    actual=$(shasum -a 256 %{SOURCE0} | cut -d ' ' -f 1)
+  else
+    echo "sha256 checker not found: sha256sum or shasum" >&2
+    exit 1
+  fi
+  if [ "$actual" != "%{source_sha256}" ]; then
+    echo "Source0 sha256 mismatch: expected %{source_sha256} but got $actual" >&2
+    exit 1
+  fi
+fi
 %setup -q -n racket-9.2.1
 
 %build
