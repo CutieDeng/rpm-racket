@@ -5,14 +5,13 @@ set -euo pipefail
 # Generated entrypoint: rpm-common.sh
 
 PACKAGE_NAME='racket9'
-PACKAGE_VERSION='9.2.1.1'
+PACKAGE_VERSION='9.2.1'
 PACKAGE_SOURCE_VERSION='9.2.1'
 PACKAGE_RELEASE='1'
 DEFAULT_PREFIX='/usr'
 SOURCE_ARCHIVE_NAME='racket-minimal-9.2.1-src.tgz'
 DEFAULT_SOURCE_URL='https://github.com/CutieDeng/racket/releases/download/v9.2.1/racket-minimal-9.2.1-src.tgz'
 SOURCE_SHA256='b9c621e5c91822181cff1b1af8813a5abd3e89795089171552dac0f441222bbd'
-FILE_LIST_SOURCE_NAME='racket9.files'
 SPEC_NAME='racket9.spec'
 
 die() {
@@ -105,58 +104,6 @@ rpm_name_for_arch() {
 
 srpm_name() {
   printf '%s-%s-%s.src.rpm\n' "$PACKAGE_NAME" "$PACKAGE_VERSION" "$PACKAGE_RELEASE"
-}
-
-is_shared_dir() {
-  case "$1" in
-    /bin|/boot|/dev|/etc|/lib|/lib64|/opt|/run|/sbin|/usr|/usr/bin|/usr/etc|/usr/games|/usr/include|/usr/lib|/usr/lib64|/usr/libexec|/usr/local|/usr/sbin|/usr/share|/usr/share/applications|/usr/share/doc|/usr/share/icons|/usr/share/icons/hicolor|/usr/share/man|/usr/share/man/man1|/usr/share/man/man2|/usr/share/man/man3|/usr/share/man/man4|/usr/share/man/man5|/usr/share/man/man6|/usr/share/man/man7|/usr/share/man/man8|/var) return 0 ;;
-    *) return 1 ;;
-  esac
-}
-
-rpm_file_list_quote() {
-  case "$1" in
-    *[!A-Za-z0-9_./:=+@%,-]*)
-      printf '"%s"' "$(printf '%s' "$1" | sed 's/["\\]/\\&/g')"
-      ;;
-    *)
-      printf '%s' "$1"
-      ;;
-  esac
-}
-
-assert_manifest_safe() {
-  local manifest="$1"
-  require_nonempty_file "$manifest"
-  if grep -Eq '^(%dir )?/usr$' "$manifest"; then
-    die "manifest must not claim shared /usr: $manifest"
-  fi
-  if grep -Eq '^(%dir )?/usr/(bin|lib|lib64|share)$' "$manifest"; then
-    die "manifest must not claim shared /usr parent directories: $manifest"
-  fi
-}
-
-generate_file_list() {
-  local install_root="$1"
-  local manifest="$2"
-  require_nonempty_dir "$install_root$PREFIX"
-  : > "$manifest"
-  while IFS= read -r -d '' path; do
-    local rel
-    rel=${path#"$install_root"}
-    [ -n "$rel" ] || continue
-    if [ -d "$path" ] && [ ! -L "$path" ]; then
-      if is_shared_dir "$rel"; then
-        continue
-      fi
-      printf '%%dir %s\n' "$(rpm_file_list_quote "$rel")" >> "$manifest"
-    elif [ -f "$path" ] || [ -L "$path" ]; then
-      printf '%s\n' "$(rpm_file_list_quote "$rel")" >> "$manifest"
-    else
-      die "unsupported staged file type: $path"
-    fi
-  done < <(find "$install_root" -mindepth 1 -print0 | sort -z)
-  assert_manifest_safe "$manifest"
 }
 
 reset_output_dir() {

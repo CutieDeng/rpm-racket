@@ -1,5 +1,5 @@
 Name: racket9
-Version: 9.2.1.1
+Version: 9.2.1
 Release: 1
 Summary: Racket programming language
 License: MIT OR Apache-2.0

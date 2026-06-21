@@ -81,6 +81,6 @@ Validate an existing RPM:
 
 ```sh
 scripts/verify-rpm.sh \
-  --rpm /path/to/artifacts/racket9-9.2.1.1-1.aarch64.rpm \
+  --rpm /path/to/artifacts/racket9-9.2.1-1.aarch64.rpm \
   --rpm-arch arm64
 ```
