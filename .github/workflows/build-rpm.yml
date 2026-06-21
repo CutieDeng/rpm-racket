@@ -1,0 +1,189 @@
+# GENERATED RPM PACKAGING METADATA - DO NOT EDIT IN rpm-racket.
+# Source of truth: /Users/cutiedeng/Y2026/M06/D21/package-racket
+# Humans and LLM agents must change package-racket and regenerate; manual rpm-racket edits are not production-safe.
+
+name: rpm build and release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-rpm:
+    name: build ${{ matrix.rpm_system }} ${{ matrix.rpm_arch }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - id: 'el9-x86_64'
+            rpm_system: 'el9'
+            rpm_release: '1'
+            rpm_arch: 'x86_64'
+            runner: 'ubuntu-24.04'
+            container: 'quay.io/centos/centos:stream9'
+            jobs: 2
+            artifact_name: 'rpm-el9-x86_64'
+            setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
+          - id: 'fc40-x86_64'
+            rpm_system: 'fc40'
+            rpm_release: '1'
+            rpm_arch: 'x86_64'
+            runner: 'ubuntu-24.04'
+            container: 'fedora:40'
+            jobs: 2
+            artifact_name: 'rpm-fc40-x86_64'
+            setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
+          - id: 'openeuler2203-aarch64'
+            rpm_system: 'openeuler2203'
+            rpm_release: '1'
+            rpm_arch: 'aarch64'
+            runner: 'ubuntu-24.04-arm'
+            container: 'openeuler/openeuler:22.03-lts'
+            jobs: 2
+            artifact_name: 'rpm-openeuler2203-aarch64'
+            setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
+          - id: 'openeuler2403-aarch64'
+            rpm_system: 'openeuler2403'
+            rpm_release: '1'
+            rpm_arch: 'aarch64'
+            runner: 'ubuntu-24.04-arm'
+            container: 'openeuler/openeuler:24.03-lts'
+            jobs: 2
+            artifact_name: 'rpm-openeuler2403-aarch64'
+            setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
+    runs-on: ${{ matrix.runner }}
+    container:
+      image: ${{ matrix.container }}
+      options: --user root
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout rpm-racket
+        uses: actions/checkout@v6
+
+      - name: Check generated repository layout
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f SPECS/racket9.spec
+          test -x scripts/build-rpm.sh
+          test -x scripts/verify-rpm.sh
+          test ! -e racket9.repo
+          test ! -d repo
+
+      - name: Install RPM build dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          packages="${{ matrix.setup_packages }}"
+          [ -n "$packages" ] || { echo 'matrix setup_packages is empty'; exit 1; }
+          if command -v dnf >/dev/null 2>&1; then
+            pm=dnf
+          elif command -v yum >/dev/null 2>&1; then
+            pm=yum
+          else
+            echo 'dnf or yum is required in the build container'
+            exit 1
+          fi
+          $pm -y install $packages
+
+      - name: Build RPM
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf "$GITHUB_WORKSPACE/artifacts" "$GITHUB_WORKSPACE/.build/${{ matrix.id }}"
+          mkdir -p "$GITHUB_WORKSPACE/artifacts" "$GITHUB_WORKSPACE/.build"
+          scripts/build-rpm.sh \
+            --artifact-dir "$GITHUB_WORKSPACE/artifacts" \
+            --work-dir "$GITHUB_WORKSPACE/.build/${{ matrix.id }}" \
+            --rpm-system "${{ matrix.rpm_system }}" \
+            --rpm-release "${{ matrix.rpm_release }}" \
+            --rpm-arch "${{ matrix.rpm_arch }}" \
+            --prefix '/usr' \
+            --jobs "${{ matrix.jobs }}"
+
+      - name: Install and uninstall smoke test
+        shell: bash
+        env:
+          PACKAGE_NAME: 'racket9'
+          PACKAGE_VERSION: '9.2.1'
+        run: |
+          set -euo pipefail
+          mapfile -t rpm_files < <(find "$GITHUB_WORKSPACE/artifacts" -maxdepth 1 -name '*.rpm' ! -name '*.src.rpm' -type f | sort)
+          if [ "${#rpm_files[@]}" -ne 1 ]; then
+            printf 'Expected exactly one RPM, got %s\n' "${#rpm_files[@]}"
+            printf '  %s\n' "${rpm_files[@]}"
+            exit 1
+          fi
+          rpm -Uvh "${rpm_files[0]}"
+          racket -e '(displayln (version))' | grep -F "$PACKAGE_VERSION"
+          racket -e '(displayln f"rpm-ci-ok")' | grep -F 'rpm-ci-ok'
+          raco pkg show --all >/tmp/raco-pkgs.txt
+          rpm -e "$PACKAGE_NAME"
+          if rpm -q "$PACKAGE_NAME" >/dev/null 2>&1; then
+            echo "Package still installed after rpm -e: $PACKAGE_NAME"
+            exit 1
+          fi
+
+      - name: Upload RPM artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: artifacts/*.rpm
+          if-no-files-found: error
+
+  publish-rpm:
+    needs: build-rpm
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - name: Download RPM artifacts
+        uses: actions/download-artifact@v6
+        with:
+          pattern: 'rpm-*'
+          path: release-assets
+          merge-multiple: true
+
+      - name: Publish RPM release assets
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: 'v9.2.1'
+          RELEASE_NAME: 'Racket 9.2.1 RPM packages'
+          CREATE_RELEASE: 'true'
+          PACKAGE_NAME: 'racket9'
+          PACKAGE_VERSION: '9.2.1'
+          EXPECTED_RPM_COUNT: 4
+        run: |
+          set -euo pipefail
+          command -v gh >/dev/null 2>&1 || { echo 'gh CLI is required on the publish runner'; exit 1; }
+          mapfile -t rpm_files < <(find "$GITHUB_WORKSPACE/release-assets" -maxdepth 2 -name '*.rpm' ! -name '*.src.rpm' -type f | sort)
+          if [ "${#rpm_files[@]}" -ne "$EXPECTED_RPM_COUNT" ]; then
+            printf 'Expected %s RPM assets, got %s\n' "$EXPECTED_RPM_COUNT" "${#rpm_files[@]}"
+            printf '  %s\n' "${rpm_files[@]}"
+            exit 1
+          fi
+          declare -A seen
+          for rpm_file in "${rpm_files[@]}"; do
+            asset_name="${rpm_file##*/}"
+            if [ -n "${seen[$asset_name]:-}" ]; then
+              echo "Duplicate RPM release asset name: $asset_name"
+              exit 1
+            fi
+            seen["$asset_name"]=1
+          done
+          if ! gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            if [ "$CREATE_RELEASE" != true ]; then
+              echo "GitHub release does not exist and create-release is false: $RELEASE_TAG"
+              exit 1
+            fi
+            gh release create "$RELEASE_TAG" --title "$RELEASE_NAME" --notes "Generated RPM artifacts for $PACKAGE_NAME $PACKAGE_VERSION."
+          fi
+          gh release upload "$RELEASE_TAG" "${rpm_files[@]}" --clobber
