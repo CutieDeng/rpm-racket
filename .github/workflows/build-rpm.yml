@@ -174,10 +174,13 @@ jobs:
         run: |
           set -euo pipefail
           command -v gh >/dev/null 2>&1 || { echo 'gh CLI is required on the publish runner'; exit 1; }
+          gh --version | sed -n '1,2p'
+          gh auth status -h github.com || true
           mapfile -t rpm_files < <(find "$GITHUB_WORKSPACE/release-assets" -maxdepth 2 -name '*.rpm' ! -name '*.src.rpm' -type f | sort)
+          printf 'Downloaded RPM files (%s):\n' "${#rpm_files[@]}"
+          printf '  %s\n' "${rpm_files[@]}"
           if [ "${#rpm_files[@]}" -ne "$EXPECTED_RPM_COUNT" ]; then
             printf 'Expected %s RPM assets, got %s\n' "$EXPECTED_RPM_COUNT" "${#rpm_files[@]}"
-            printf '  %s\n' "${rpm_files[@]}"
             exit 1
           fi
           declare -A seen
@@ -189,6 +192,8 @@ jobs:
             fi
             seen["$asset_name"]=1
           done
+          printf 'Release assets before upload for %s:\n' "$RELEASE_TAG"
+          gh api "repos/${GITHUB_REPOSITORY}/releases/tags/$RELEASE_TAG" --jq '.assets[].name' || true
           if ! gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
             if [ "$CREATE_RELEASE" != true ]; then
               echo "GitHub release does not exist and create-release is false: $RELEASE_TAG"
@@ -196,4 +201,8 @@ jobs:
             fi
             gh release create "$RELEASE_TAG" --title "$RELEASE_NAME" --notes "Generated RPM artifacts for $PACKAGE_NAME $PACKAGE_VERSION."
           fi
+          printf 'Uploading RPM files to release %s:\n' "$RELEASE_TAG"
+          printf '  %s\n' "${rpm_files[@]}"
           gh release upload "$RELEASE_TAG" "${rpm_files[@]}" --clobber
+          printf 'Release assets after upload for %s:\n' "$RELEASE_TAG"
+          gh api "repos/${GITHUB_REPOSITORY}/releases/tags/$RELEASE_TAG" --jq '.assets[].name'
