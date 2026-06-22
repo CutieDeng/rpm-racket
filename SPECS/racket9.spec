@@ -59,10 +59,10 @@ while IFS= read -r path; do
   rel=${path#"%{buildroot}"}
   [ -n "$rel" ] || continue
   case "$rel" in
-    /usr|/usr/bin|/usr/lib|/usr/lib64|/usr/share) continue ;;
+    /bin|/boot|/dev|/etc|/lib|/lib64|/opt|/run|/sbin|/usr|/usr/bin|/usr/etc|/usr/games|/usr/include|/usr/lib|/usr/lib64|/usr/libexec|/usr/local|/usr/sbin|/usr/share|/usr/share/applications|/usr/share/doc|/usr/share/icons|/usr/share/icons/hicolor|/usr/share/man|/usr/share/man/man1|/usr/share/man/man2|/usr/share/man/man3|/usr/share/man/man4|/usr/share/man/man5|/usr/share/man/man6|/usr/share/man/man7|/usr/share/man/man8|/var) continue ;;
   esac
   if [ -d "$path" ] && [ ! -L "$path" ]; then
-    printf '%%dir %s\n' "$rel" >> "$manifest"
+    printf '%s %s\n' '%%dir' "$rel" >> "$manifest"
   elif [ -f "$path" ] || [ -L "$path" ]; then
     printf '%s\n' "$rel" >> "$manifest"
   else
@@ -70,8 +70,7 @@ while IFS= read -r path; do
     exit 1
   fi
 done < "$paths"
-grep -Eq '^(%dir )?/usr$' "$manifest" && exit 1
-grep -Eq '^(%dir )?/usr/(bin|lib|lib64|share)$' "$manifest" && exit 1
+grep -Eq '^(%dir )?(/bin|/boot|/dev|/etc|/lib|/lib64|/opt|/run|/sbin|/usr|/usr/bin|/usr/etc|/usr/games|/usr/include|/usr/lib|/usr/lib64|/usr/libexec|/usr/local|/usr/sbin|/usr/share|/usr/share/applications|/usr/share/doc|/usr/share/icons|/usr/share/icons/hicolor|/usr/share/man|/usr/share/man/man1|/usr/share/man/man2|/usr/share/man/man3|/usr/share/man/man4|/usr/share/man/man5|/usr/share/man/man6|/usr/share/man/man7|/usr/share/man/man8|/var)$' "$manifest" && exit 1
 
 %files -f %{name}.files
 %defattr(-,root,root,-)
