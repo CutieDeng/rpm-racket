@@ -165,6 +165,7 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
           RELEASE_TAG: 'v9.2.1'
           RELEASE_NAME: 'Racket 9.2.1 RPM packages'
           CREATE_RELEASE: 'true'
@@ -194,15 +195,15 @@ jobs:
           done
           printf 'Release assets before upload for %s:\n' "$RELEASE_TAG"
           gh api "repos/${GITHUB_REPOSITORY}/releases/tags/$RELEASE_TAG" --jq '.assets[].name' || true
-          if ! gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+          if ! gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             if [ "$CREATE_RELEASE" != true ]; then
               echo "GitHub release does not exist and create-release is false: $RELEASE_TAG"
               exit 1
             fi
-            gh release create "$RELEASE_TAG" --title "$RELEASE_NAME" --notes "Generated RPM artifacts for $PACKAGE_NAME $PACKAGE_VERSION."
+            gh release create "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --title "$RELEASE_NAME" --notes "Generated RPM artifacts for $PACKAGE_NAME $PACKAGE_VERSION."
           fi
           printf 'Uploading RPM files to release %s:\n' "$RELEASE_TAG"
           printf '  %s\n' "${rpm_files[@]}"
-          gh release upload "$RELEASE_TAG" "${rpm_files[@]}" --clobber
+          gh release upload "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" "${rpm_files[@]}" --clobber
           printf 'Release assets after upload for %s:\n' "$RELEASE_TAG"
           gh api "repos/${GITHUB_REPOSITORY}/releases/tags/$RELEASE_TAG" --jq '.assets[].name'
