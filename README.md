@@ -31,7 +31,7 @@ racket package-racket.rkt \
   --target rpm-spec \
   --prefix /usr \
   --rpm-system openeuler2403 \
-  --rpm-release 2 \
+  --rpm-release 3 \
   --rpm-arch arm64 \
   --rpm-repo-config /Users/cutiedeng/Y2026/M06/D21/package-racket/rpm-repo-config.rktd
 ```
@@ -56,7 +56,7 @@ scripts/build-rpm.sh \
   --artifact-dir /path/to/artifacts \
   --work-dir /path/to/work \
   --rpm-system openeuler2403 \
-  --rpm-release 2 \
+  --rpm-release 3 \
   --rpm-arch arm64 \
   --prefix /usr
 ```
@@ -69,7 +69,7 @@ scripts/build-rpm.sh \
   --artifact-dir /path/to/artifacts \
   --work-dir /path/to/work \
   --rpm-system openeuler2403 \
-  --rpm-release 2 \
+  --rpm-release 3 \
   --rpm-arch arm64 \
   --prefix /usr
 ```
@@ -79,10 +79,10 @@ Supported RPM systems are `el9`, `fc40`, `openeuler2203`, and
 production artifacts. Common explicit target examples:
 
 ```sh
---rpm-system el9 --rpm-release 2 --rpm-arch x86_64
---rpm-system fc40 --rpm-release 2 --rpm-arch x86_64
---rpm-system openeuler2203 --rpm-release 2 --rpm-arch arm64
---rpm-system openeuler2403 --rpm-release 2 --rpm-arch arm64
+--rpm-system el9 --rpm-release 3 --rpm-arch x86_64
+--rpm-system fc40 --rpm-release 3 --rpm-arch x86_64
+--rpm-system openeuler2203 --rpm-release 3 --rpm-arch arm64
+--rpm-system openeuler2403 --rpm-release 3 --rpm-arch arm64
 ```
 
 Build the matching SRPM from the generated GitHub Release source URL:
@@ -92,7 +92,7 @@ scripts/build-srpm.sh \
   --artifact-dir /path/to/artifacts \
   --work-dir /path/to/work \
   --rpm-system openeuler2403 \
-  --rpm-release 2 \
+  --rpm-release 3 \
   --rpm-arch arm64 \
   --prefix /usr
 ```
@@ -105,7 +105,7 @@ scripts/build-srpm.sh \
   --artifact-dir /path/to/artifacts \
   --work-dir /path/to/work \
   --rpm-system openeuler2403 \
-  --rpm-release 2 \
+  --rpm-release 3 \
   --rpm-arch arm64 \
   --prefix /usr
 ```
@@ -114,8 +114,8 @@ Validate an existing RPM:
 
 ```sh
 scripts/verify-rpm.sh \
-  --rpm /path/to/artifacts/racket9-9.2.1-2.openeuler2403.aarch64.rpm \
+  --rpm /path/to/artifacts/racket9-9.2.1-3.openeuler2403.aarch64.rpm \
   --rpm-system openeuler2403 \
-  --rpm-release 2 \
+  --rpm-release 3 \
   --rpm-arch arm64
 ```
