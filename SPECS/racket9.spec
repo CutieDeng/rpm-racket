@@ -8,6 +8,10 @@ License: MIT OR Apache-2.0
 URL: https://racket-lang.org/
 Source0: https://github.com/CutieDeng/racket/releases/download/v9.2.1/racket-minimal-9.2.1-src.tgz
 AutoReqProv: no
+# Racket CS stores its boot image in the .rackboot ELF section. RPM debuginfo
+# extraction removes that section on openEuler, so the package must keep debug
+# data in the main executables.
+%global debug_package %{nil}
 %global __brp_compress %{nil}
 %global package_prefix /usr
 %global source_sha256 b9c621e5c91822181cff1b1af8813a5abd3e89795089171552dac0f441222bbd
