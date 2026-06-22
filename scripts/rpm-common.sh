@@ -33,7 +33,6 @@ repo_root_from_script() {
 require_repo_root() {
   local root="$1"
   [ -d "$root" ] || die "repository root does not exist: $root"
-  [ -d "$root/.git" ] || die "repository root is not a Git repository: $root"
   [ -f "$root/SPECS/$SPEC_NAME" ] || die "missing spec file: $root/SPECS/$SPEC_NAME"
   [ -f "$root/scripts/rpm-common.sh" ] || die "missing common script: $root/scripts/rpm-common.sh"
 }
