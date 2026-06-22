@@ -120,9 +120,19 @@ jobs:
             printf '  %s\n' "${rpm_files[@]}"
             exit 1
           fi
-          rpm -Uvh "${rpm_files[0]}"
+          if command -v dnf >/dev/null 2>&1; then
+            pm=dnf
+          elif command -v yum >/dev/null 2>&1; then
+            pm=yum
+          else
+            echo 'dnf or yum is required for RPM install smoke test'
+            exit 1
+          fi
+          $pm -y install "${rpm_files[0]}"
+          rpm -q libedit >/dev/null
           racket -e '(displayln (version))' | grep -F "$PACKAGE_VERSION"
           racket -e '(displayln f"rpm-ci-ok")' | grep -F 'rpm-ci-ok'
+          racket -e '(require readline/readline) (displayln f"rpm-readline-ok")' | grep -F 'rpm-readline-ok'
           raco pkg show --all >/tmp/raco-pkgs.txt
           rpm -e "$PACKAGE_NAME"
           if rpm -q "$PACKAGE_NAME" >/dev/null 2>&1; then
