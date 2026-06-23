@@ -22,7 +22,7 @@ jobs:
         include:
           - id: 'el9-x86_64'
             rpm_system: 'el9'
-            rpm_release: '3'
+            rpm_release: '4'
             rpm_arch: 'x86_64'
             runner: 'ubuntu-24.04'
             container: 'quay.io/centos/centos:stream9'
@@ -31,7 +31,7 @@ jobs:
             setup_packages: 'bash diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'fc40-x86_64'
             rpm_system: 'fc40'
-            rpm_release: '3'
+            rpm_release: '4'
             rpm_arch: 'x86_64'
             runner: 'ubuntu-24.04'
             container: 'fedora:40'
@@ -40,21 +40,39 @@ jobs:
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'openeuler2203-aarch64'
             rpm_system: 'openeuler2203'
-            rpm_release: '3'
+            rpm_release: '4'
             rpm_arch: 'aarch64'
             runner: 'ubuntu-24.04-arm'
             container: 'openeuler/openeuler:22.03-lts'
             jobs: 2
             artifact_name: 'rpm-openeuler2203-aarch64'
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
+          - id: 'openeuler2203-x86_64'
+            rpm_system: 'openeuler2203'
+            rpm_release: '4'
+            rpm_arch: 'x86_64'
+            runner: 'ubuntu-24.04'
+            container: 'openeuler/openeuler:22.03-lts'
+            jobs: 2
+            artifact_name: 'rpm-openeuler2203-x86_64'
+            setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'openeuler2403-aarch64'
             rpm_system: 'openeuler2403'
-            rpm_release: '3'
+            rpm_release: '4'
             rpm_arch: 'aarch64'
             runner: 'ubuntu-24.04-arm'
             container: 'openeuler/openeuler:24.03-lts'
             jobs: 2
             artifact_name: 'rpm-openeuler2403-aarch64'
+            setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
+          - id: 'openeuler2403-x86_64'
+            rpm_system: 'openeuler2403'
+            rpm_release: '4'
+            rpm_arch: 'x86_64'
+            runner: 'ubuntu-24.04'
+            container: 'openeuler/openeuler:24.03-lts'
+            jobs: 2
+            artifact_name: 'rpm-openeuler2403-x86_64'
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
     runs-on: ${{ matrix.runner }}
     container:
@@ -171,7 +189,7 @@ jobs:
           CREATE_RELEASE: 'true'
           PACKAGE_NAME: 'racket9'
           PACKAGE_VERSION: '9.2.1'
-          EXPECTED_RPM_COUNT: 4
+          EXPECTED_RPM_COUNT: 6
         run: |
           set -euo pipefail
           command -v gh >/dev/null 2>&1 || { echo 'gh CLI is required on the publish runner'; exit 1; }

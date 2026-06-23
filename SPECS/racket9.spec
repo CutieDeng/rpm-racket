@@ -1,7 +1,7 @@
 Name: racket9
 Version: 9.2.1
 %{!?package_system:%global package_system openeuler2403}
-%{!?package_release:%global package_release 3}
+%{!?package_release:%global package_release 4}
 Release: %{package_release}.%{package_system}
 Summary: Racket programming language
 License: MIT OR Apache-2.0
@@ -15,7 +15,7 @@ Requires: libedit
 %global debug_package %{nil}
 %global __brp_compress %{nil}
 %global package_prefix /usr
-%global source_sha256 b1b444059a00d41aebac94da8941eb45465aba8637eb8826058e40cc1e79eebc
+%global source_sha256 81792a368e4317d67fa4bcd1463f38262deb8e012ad21a8e4e28aca7aaa46850
 
 %description
 Racket packaged from a stable source release archive.

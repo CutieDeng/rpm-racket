@@ -8,11 +8,11 @@ PACKAGE_NAME='racket9'
 PACKAGE_VERSION='9.2.1'
 PACKAGE_SOURCE_VERSION='9.2.1'
 DEFAULT_RPM_SYSTEM='openeuler2403'
-DEFAULT_RPM_RELEASE='3'
+DEFAULT_RPM_RELEASE='4'
 DEFAULT_PREFIX='/usr'
 SOURCE_ARCHIVE_NAME='racket-minimal-9.2.1-src.tgz'
 DEFAULT_SOURCE_URL='https://github.com/CutieDeng/racket/releases/download/v9.2.1/racket-minimal-9.2.1-src.tgz'
-SOURCE_SHA256='b1b444059a00d41aebac94da8941eb45465aba8637eb8826058e40cc1e79eebc'
+SOURCE_SHA256='81792a368e4317d67fa4bcd1463f38262deb8e012ad21a8e4e28aca7aaa46850'
 SPEC_NAME='racket9.spec'
 
 die() {
