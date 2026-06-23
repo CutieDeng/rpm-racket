@@ -15,7 +15,7 @@ Requires: libedit
 %global debug_package %{nil}
 %global __brp_compress %{nil}
 %global package_prefix /usr
-%global source_sha256 8000263185bdf872f299fe0dfc072cb1a5782995aae52f753e176c158d556166
+%global source_sha256 b1b444059a00d41aebac94da8941eb45465aba8637eb8826058e40cc1e79eebc
 
 %description
 Racket packaged from a stable source release archive.
@@ -38,13 +38,14 @@ fi
 %setup -q -n racket-9.2.1
 
 %build
-sed -i 's/))$/) (default-scope . "installation"))/' etc/config.rktd
+sed -i 's|))$|) (default-scope . "installation") (compiled-file-cache-roots . (user system)) (compiled-file-system-cache-root . "/var/cache/racket/compiled"))|' etc/config.rktd
 sed -i 's/"1[.]1"/"3"/g' collects/openssl/libssl.rkt collects/openssl/libcrypto.rkt
 cd src
 ./configure \
   --disable-debug \
   --disable-dependency-tracking \
   --enable-origtree=no \
+  --enable-sharezo \
   --prefix=%{package_prefix} \
   --sysconfdir=%{_sysconfdir} \
   --enable-useprefix
@@ -55,6 +56,7 @@ rm -rf %{buildroot}
 cd src
 make install DESTDIR=%{buildroot}
 cd ..
+find "%{buildroot}" -type d -name compiled -prune -exec rm -rf {} +
 
 manifest="%{name}.files"
 paths="%{name}.paths"
@@ -76,6 +78,11 @@ while IFS= read -r path; do
   fi
 done < "$paths"
 grep -Eq '^(%dir )?(/bin|/boot|/dev|/etc|/lib|/lib64|/opt|/run|/sbin|/usr|/usr/bin|/usr/etc|/usr/games|/usr/include|/usr/lib|/usr/lib64|/usr/libexec|/usr/local|/usr/sbin|/usr/share|/usr/share/applications|/usr/share/doc|/usr/share/icons|/usr/share/icons/hicolor|/usr/share/man|/usr/share/man/man1|/usr/share/man/man2|/usr/share/man/man3|/usr/share/man/man4|/usr/share/man/man5|/usr/share/man/man6|/usr/share/man/man7|/usr/share/man/man8|/var)$' "$manifest" && exit 1
+
+%preun
+if [ "$1" = "0" ] && command -v raco >/dev/null 2>&1; then
+  raco setup --system --delete-cache || :
+fi
 
 %files -f %{name}.files
 %defattr(-,root,root,-)

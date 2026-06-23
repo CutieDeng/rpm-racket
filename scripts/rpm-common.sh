@@ -12,7 +12,7 @@ DEFAULT_RPM_RELEASE='3'
 DEFAULT_PREFIX='/usr'
 SOURCE_ARCHIVE_NAME='racket-minimal-9.2.1-src.tgz'
 DEFAULT_SOURCE_URL='https://github.com/CutieDeng/racket/releases/download/v9.2.1/racket-minimal-9.2.1-src.tgz'
-SOURCE_SHA256='8000263185bdf872f299fe0dfc072cb1a5782995aae52f753e176c158d556166'
+SOURCE_SHA256='b1b444059a00d41aebac94da8941eb45465aba8637eb8826058e40cc1e79eebc'
 SPEC_NAME='racket9.spec'
 
 die() {
