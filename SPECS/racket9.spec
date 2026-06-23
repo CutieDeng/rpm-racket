@@ -1,7 +1,7 @@
 Name: racket9
 Version: 9.2.1
 %{!?package_system:%global package_system openeuler2403}
-%{!?package_release:%global package_release 4}
+%{!?package_release:%global package_release 5}
 Release: %{package_release}.%{package_system}
 Summary: Racket programming language
 License: MIT OR Apache-2.0
@@ -15,7 +15,7 @@ Requires: libedit
 %global debug_package %{nil}
 %global __brp_compress %{nil}
 %global package_prefix /usr
-%global source_sha256 81792a368e4317d67fa4bcd1463f38262deb8e012ad21a8e4e28aca7aaa46850
+%global source_sha256 133e445460bf21862eeae9314441711f109ba4ca7561c17c7d2132a0eaf012fc
 
 %description
 Racket packaged from a stable source release archive.
@@ -56,7 +56,7 @@ rm -rf %{buildroot}
 cd src
 make install DESTDIR=%{buildroot}
 cd ..
-find "%{buildroot}" -type d -name compiled -prune -exec rm -rf {} +
+find "%{buildroot}" -type d -name compiled ! -path '*/info-domain/compiled' -prune -exec rm -rf {} +
 
 manifest="%{name}.files"
 paths="%{name}.paths"
