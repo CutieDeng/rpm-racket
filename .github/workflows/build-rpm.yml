@@ -22,7 +22,7 @@ jobs:
         include:
           - id: 'el9-x86_64'
             rpm_system: 'el9'
-            rpm_release: '5'
+            rpm_release: '6'
             rpm_arch: 'x86_64'
             runner: 'ubuntu-24.04'
             container: 'quay.io/centos/centos:stream9'
@@ -31,7 +31,7 @@ jobs:
             setup_packages: 'bash diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'fc40-x86_64'
             rpm_system: 'fc40'
-            rpm_release: '5'
+            rpm_release: '6'
             rpm_arch: 'x86_64'
             runner: 'ubuntu-24.04'
             container: 'fedora:40'
@@ -40,7 +40,7 @@ jobs:
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'openeuler2203-aarch64'
             rpm_system: 'openeuler2203'
-            rpm_release: '5'
+            rpm_release: '6'
             rpm_arch: 'aarch64'
             runner: 'ubuntu-24.04-arm'
             container: 'openeuler/openeuler:22.03-lts'
@@ -49,7 +49,7 @@ jobs:
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'openeuler2203-x86_64'
             rpm_system: 'openeuler2203'
-            rpm_release: '5'
+            rpm_release: '6'
             rpm_arch: 'x86_64'
             runner: 'ubuntu-24.04'
             container: 'openeuler/openeuler:22.03-lts'
@@ -58,7 +58,7 @@ jobs:
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'openeuler2403-aarch64'
             rpm_system: 'openeuler2403'
-            rpm_release: '5'
+            rpm_release: '6'
             rpm_arch: 'aarch64'
             runner: 'ubuntu-24.04-arm'
             container: 'openeuler/openeuler:24.03-lts'
@@ -67,7 +67,7 @@ jobs:
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'openeuler2403-x86_64'
             rpm_system: 'openeuler2403'
-            rpm_release: '5'
+            rpm_release: '6'
             rpm_arch: 'x86_64'
             runner: 'ubuntu-24.04'
             container: 'openeuler/openeuler:24.03-lts'
@@ -148,15 +148,21 @@ jobs:
           fi
           $pm -y install "${rpm_files[0]}"
           rpm -q libedit >/dev/null
+          cache_count=$(find /var/cache/racket/compiled -path '*/compiled/*.zo' 2>/dev/null | wc -l)
+          [ "$cache_count" -gt 0 ] || { echo 'system compiled cache is empty after RPM install'; exit 1; }
           racket -e '(displayln (version))' | grep -F "$PACKAGE_VERSION"
           racket -e '(displayln f"rpm-ci-ok")' | grep -F 'rpm-ci-ok'
           racket -e '(require readline/readline) (displayln f"rpm-readline-ok")' | grep -F 'rpm-readline-ok'
+          empty_home=$(mktemp -d)
+          HOME="$empty_home" racket -e '(require racket/list racket/match racket/file) (displayln f"rpm-empty-home-ok")' | grep -F 'rpm-empty-home-ok'
+          rm -rf "$empty_home"
           raco pkg show --all >/tmp/raco-pkgs.txt
           rpm -e "$PACKAGE_NAME"
           if rpm -q "$PACKAGE_NAME" >/dev/null 2>&1; then
             echo "Package still installed after rpm -e: $PACKAGE_NAME"
             exit 1
           fi
+          [ ! -d /var/cache/racket/compiled ] || { echo 'system compiled cache remains after RPM erase'; exit 1; }
 
       - name: Upload RPM artifact
         uses: actions/upload-artifact@v6

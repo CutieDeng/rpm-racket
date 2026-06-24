@@ -1,7 +1,7 @@
 Name: racket9
 Version: 9.2.1
 %{!?package_system:%global package_system openeuler2403}
-%{!?package_release:%global package_release 5}
+%{!?package_release:%global package_release 6}
 Release: %{package_release}.%{package_system}
 Summary: Racket programming language
 License: MIT OR Apache-2.0
@@ -79,9 +79,17 @@ while IFS= read -r path; do
 done < "$paths"
 grep -Eq '^(%dir )?(/bin|/boot|/dev|/etc|/lib|/lib64|/opt|/run|/sbin|/usr|/usr/bin|/usr/etc|/usr/games|/usr/include|/usr/lib|/usr/lib64|/usr/libexec|/usr/local|/usr/sbin|/usr/share|/usr/share/applications|/usr/share/doc|/usr/share/icons|/usr/share/icons/hicolor|/usr/share/man|/usr/share/man/man1|/usr/share/man/man2|/usr/share/man/man3|/usr/share/man/man4|/usr/share/man/man5|/usr/share/man/man6|/usr/share/man/man7|/usr/share/man/man8|/var)$' "$manifest" && exit 1
 
+%posttrans
+raco setup --system --no-user --reset-cache -D --no-pkg-deps
+
 %preun
 if [ "$1" = "0" ] && command -v raco >/dev/null 2>&1; then
   raco setup --system --delete-cache || :
+fi
+
+%postun
+if [ "$1" = "0" ]; then
+  rm -rf /var/cache/racket/compiled
 fi
 
 %files -f %{name}.files
