@@ -5,14 +5,14 @@ set -euo pipefail
 # Generated entrypoint: rpm-common.sh
 
 PACKAGE_NAME='racket9'
-PACKAGE_VERSION='9.2.1'
-PACKAGE_SOURCE_VERSION='9.2.1'
+PACKAGE_VERSION='9.2.2'
+PACKAGE_SOURCE_VERSION='9.2.2'
 DEFAULT_RPM_SYSTEM='openeuler2403'
-DEFAULT_RPM_RELEASE='6'
+DEFAULT_RPM_RELEASE='1'
 DEFAULT_PREFIX='/usr'
-SOURCE_ARCHIVE_NAME='racket-minimal-9.2.1-src.tgz'
-DEFAULT_SOURCE_URL='https://github.com/CutieDeng/racket/releases/download/v9.2.1/racket-minimal-9.2.1-src.tgz'
-SOURCE_SHA256='133e445460bf21862eeae9314441711f109ba4ca7561c17c7d2132a0eaf012fc'
+SOURCE_ARCHIVE_NAME='racket-minimal-9.2.2-src.tgz'
+DEFAULT_SOURCE_URL='https://github.com/CutieDeng/racket/releases/download/v9.2.2/racket-minimal-9.2.2-src.tgz'
+SOURCE_SHA256='ecd74fcdab8d44816e2d9dd4f995de875d6b888367ee1ddef32bc06f25e4ac09'
 SPEC_NAME='racket9.spec'
 
 die() {

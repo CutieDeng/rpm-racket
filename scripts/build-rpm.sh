@@ -15,7 +15,7 @@ Build a binary RPM from SPECS/racket9.spec and a stable source archive. All
 mutable paths are named.
 
 Options:
-  --source-archive PATH  Local racket-minimal-9.2.1-src.tgz to copy into rpmbuild.
+  --source-archive PATH  Local racket-minimal-9.2.2-src.tgz to copy into rpmbuild.
   --source-url URL       Source archive URL. Defaults to the generated release URL.
   --artifact-dir PATH    Directory that receives the final .rpm.
   --work-dir PATH        Build work directory for rpmbuild.

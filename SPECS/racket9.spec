@@ -1,12 +1,12 @@
 Name: racket9
-Version: 9.2.1
+Version: 9.2.2
 %{!?package_system:%global package_system openeuler2403}
-%{!?package_release:%global package_release 6}
+%{!?package_release:%global package_release 1}
 Release: %{package_release}.%{package_system}
 Summary: Racket programming language
 License: MIT OR Apache-2.0
 URL: https://racket-lang.org/
-Source0: https://github.com/CutieDeng/racket/releases/download/v9.2.1/racket-minimal-9.2.1-src.tgz
+Source0: https://github.com/CutieDeng/racket/releases/download/v9.2.2/racket-minimal-9.2.2-src.tgz
 AutoReqProv: no
 Requires: libedit
 # Racket CS stores its boot image in the .rackboot ELF section. RPM debuginfo
@@ -15,7 +15,7 @@ Requires: libedit
 %global debug_package %{nil}
 %global __brp_compress %{nil}
 %global package_prefix /usr
-%global source_sha256 133e445460bf21862eeae9314441711f109ba4ca7561c17c7d2132a0eaf012fc
+%global source_sha256 ecd74fcdab8d44816e2d9dd4f995de875d6b888367ee1ddef32bc06f25e4ac09
 
 %description
 Racket packaged from a stable source release archive.
@@ -35,7 +35,7 @@ if [ -n "%{source_sha256}" ]; then
     exit 1
   fi
 fi
-%setup -q -n racket-9.2.1
+%setup -q -n racket-9.2.2
 
 %build
 sed -i 's|))$|) (default-scope . "installation") (compiled-file-cache-roots . (user system)) (compiled-file-system-cache-root . "/var/cache/racket/compiled"))|' etc/config.rktd
