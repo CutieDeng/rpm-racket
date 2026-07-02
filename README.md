@@ -74,13 +74,15 @@ scripts/build-rpm.sh \
   --prefix /usr
 ```
 
-Supported RPM systems are `el9`, `fc40`, `openeuler2203`, and
+Supported RPM systems are `el9`, `fc40`, `fc43`, `fc44`, `openeuler2203`, and
 `openeuler2403`. The generic `openeuler` value is intentionally rejected for
 production artifacts. Common explicit target examples:
 
 ```sh
 --rpm-system el9 --rpm-release 1 --rpm-arch x86_64
 --rpm-system fc40 --rpm-release 1 --rpm-arch x86_64
+--rpm-system fc43 --rpm-release 1 --rpm-arch x86_64
+--rpm-system fc44 --rpm-release 1 --rpm-arch x86_64
 --rpm-system openeuler2203 --rpm-release 1 --rpm-arch x86_64
 --rpm-system openeuler2203 --rpm-release 1 --rpm-arch arm64
 --rpm-system openeuler2403 --rpm-release 1 --rpm-arch x86_64

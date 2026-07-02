@@ -38,6 +38,24 @@ jobs:
             jobs: 2
             artifact_name: 'rpm-fc40-x86_64'
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
+          - id: 'fc43-x86_64'
+            rpm_system: 'fc43'
+            rpm_release: '1'
+            rpm_arch: 'x86_64'
+            runner: 'ubuntu-24.04'
+            container: 'fedora:43'
+            jobs: 2
+            artifact_name: 'rpm-fc43-x86_64'
+            setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
+          - id: 'fc44-x86_64'
+            rpm_system: 'fc44'
+            rpm_release: '1'
+            rpm_arch: 'x86_64'
+            runner: 'ubuntu-24.04'
+            container: 'fedora:44'
+            jobs: 2
+            artifact_name: 'rpm-fc44-x86_64'
+            setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'openeuler2203-aarch64'
             rpm_system: 'openeuler2203'
             rpm_release: '1'
@@ -195,7 +213,7 @@ jobs:
           CREATE_RELEASE: 'true'
           PACKAGE_NAME: 'racket9'
           PACKAGE_VERSION: '9.2.2'
-          EXPECTED_RPM_COUNT: 6
+          EXPECTED_RPM_COUNT: 8
         run: |
           set -euo pipefail
           command -v gh >/dev/null 2>&1 || { echo 'gh CLI is required on the publish runner'; exit 1; }
