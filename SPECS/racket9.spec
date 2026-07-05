@@ -73,16 +73,18 @@ config_file="$config_dir/config.rktd"
 runtime_cache_root="/var/cache/racket/compiled"
 staged_cache_root="%{buildroot}$runtime_cache_root"
 racket_bin="%{buildroot}%{package_prefix}/bin/racket"
+collects_dir="%{buildroot}%{package_prefix}/share/racket/collects"
 backup="$config_file.package-racket-cache-backup"
 [ -f "$config_file" ] || { echo "missing staged config: $config_file" >&2; exit 1; }
 [ -x "$racket_bin" ] || { echo "missing staged racket: $racket_bin" >&2; exit 1; }
+[ -d "$collects_dir" ] || { echo "missing staged collects: $collects_dir" >&2; exit 1; }
 cp "$config_file" "$backup"
 escaped_runtime=$(printf '%s\n' "$runtime_cache_root" | sed 's/[&|]/\\&/g')
 escaped_staged=$(printf '%s\n' "$staged_cache_root" | sed 's/[&|]/\\&/g')
 grep -F "$runtime_cache_root" "$config_file" >/dev/null || { echo "config missing runtime cache root" >&2; exit 1; }
 sed -i "s|$escaped_runtime|$escaped_staged|g" "$config_file"
 mkdir -p "$staged_cache_root"
-if ! "$racket_bin" -G "$config_dir" -N raco -l- raco setup --system --no-user --reset-cache -D --no-pkg-deps; then
+if ! "$racket_bin" -X "$collects_dir" -G "$config_dir" -N raco -l- raco setup --system --no-user --reset-cache -D --no-pkg-deps; then
   cp "$backup" "$config_file"
   rm -f "$backup"
   exit 1
