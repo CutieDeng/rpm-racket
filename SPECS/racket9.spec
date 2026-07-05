@@ -5,7 +5,7 @@
 Name: %{package_name}
 Version: 9.2.2
 %{!?package_system:%global package_system openeuler2403}
-%{!?package_release:%global package_release 2}
+%{!?package_release:%global package_release 3}
 Release: %{package_release}.%{package_system}
 Summary: Racket programming language
 License: MIT OR Apache-2.0
@@ -79,10 +79,42 @@ backup="$config_file.package-racket-cache-backup"
 [ -x "$racket_bin" ] || { echo "missing staged racket: $racket_bin" >&2; exit 1; }
 [ -d "$collects_dir" ] || { echo "missing staged collects: $collects_dir" >&2; exit 1; }
 cp "$config_file" "$backup"
-escaped_runtime=$(printf '%s\n' "$runtime_cache_root" | sed 's/[&|]/\\&/g')
-escaped_staged=$(printf '%s\n' "$staged_cache_root" | sed 's/[&|]/\\&/g')
-grep -F "$runtime_cache_root" "$config_file" >/dev/null || { echo "config missing runtime cache root" >&2; exit 1; }
-sed -i "s|$escaped_runtime|$escaped_staged|g" "$config_file"
+"$racket_bin" -X "$collects_dir" -G "$config_dir" -e '
+(let ()
+  (define args (current-command-line-arguments))
+  (define config-file (vector-ref args 0))
+  (define stage-root (vector-ref args 1))
+  (define prefix (vector-ref args 2))
+  (define runtime-cache-root (vector-ref args 3))
+  (define staged-cache-root (vector-ref args 4))
+  (define config (call-with-input-file config-file read))
+  (unless (hash? config)
+    (error (quote rpm-staged-config) "expected config.rktd to contain a hash" config-file))
+  (unless (equal? (hash-ref config (quote compiled-file-system-cache-root) #f)
+                  runtime-cache-root)
+    (error (quote rpm-staged-config) "config missing expected runtime cache root" runtime-cache-root))
+  (define (staged-path suffix)
+    (string-append stage-root prefix suffix))
+  (define updates
+    (hash (quote compiled-file-system-cache-root) staged-cache-root
+          (quote share-dir) (staged-path "/share/racket")
+          (quote pkgs-dir) (staged-path "/share/racket/pkgs")
+          (quote doc-dir) (staged-path "/share/doc/racket")
+          (quote lib-dir) (staged-path "/lib/racket")
+          (quote include-dir) (staged-path "/include/racket")
+          (quote bin-dir) (staged-path "/bin")
+          (quote apps-dir) (staged-path "/share/applications")
+          (quote man-dir) (staged-path "/share/man")))
+  (define staged-config
+    (for/fold ([config config]) ([(key value) (in-hash updates)])
+      (if (hash-has-key? config key)
+          (hash-set config key value)
+          config)))
+  (call-with-output-file config-file
+    #:exists (quote truncate/replace)
+    (lambda (out)
+      (write staged-config out)
+      (newline out))))' -- "$config_file" "%{buildroot}" "%{package_prefix}" "$runtime_cache_root" "$staged_cache_root"
 mkdir -p "$staged_cache_root"
 if ! "$racket_bin" -X "$collects_dir" -G "$config_dir" -N raco -l- raco setup --system --no-user --reset-cache -D --no-pkg-deps; then
   cp "$backup" "$config_file"
@@ -107,12 +139,15 @@ move_cache_tree() {
   fi
 }
 runtime_collects_dir="%{package_prefix}/share/racket/collects"
+runtime_pkgs_dir="%{package_prefix}/share/racket/pkgs"
 move_cache_tree "$collects_dir" "$runtime_collects_dir"
-move_cache_tree "%{buildroot}%{package_prefix}/share/racket/pkgs" "%{package_prefix}/share/racket/pkgs"
+move_cache_tree "%{buildroot}$runtime_pkgs_dir" "$runtime_pkgs_dir"
 rm -f "%{buildroot}/var/cache/racket/racket-compiled-cache.log"
 find "$staged_cache_root" -type d -empty -delete 2>/dev/null || :
 runtime_collects_cache="$staged_cache_root/${runtime_collects_dir#/}"
+runtime_pkgs_cache="$staged_cache_root/${runtime_pkgs_dir#/}"
 find "$runtime_collects_cache" -path '*/compiled/*.zo' -type f -print -quit | grep -q . || { echo "runtime-keyed staged system compiled cache is empty: $runtime_collects_cache" >&2; exit 1; }
+find "$runtime_pkgs_cache" -path '*/compiled/*.zo' -type f -print -quit | grep -q . || { echo "runtime-keyed staged package compiled cache is empty: $runtime_pkgs_cache" >&2; exit 1; }
 %endif
 
 manifest="%{name}.files"

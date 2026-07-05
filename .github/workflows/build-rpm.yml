@@ -22,7 +22,7 @@ jobs:
         include:
           - id: 'el9-x86_64-postinstall'
             rpm_system: 'el9'
-            rpm_release: '2'
+            rpm_release: '3'
             rpm_arch: 'x86_64'
             cache_mode: 'postinstall'
             package_name: 'racket9'
@@ -33,7 +33,7 @@ jobs:
             setup_packages: 'bash diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'el9-x86_64-cached'
             rpm_system: 'el9'
-            rpm_release: '2'
+            rpm_release: '3'
             rpm_arch: 'x86_64'
             cache_mode: 'cached'
             package_name: 'racket9-cached'
@@ -44,7 +44,7 @@ jobs:
             setup_packages: 'bash diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'fc40-x86_64-postinstall'
             rpm_system: 'fc40'
-            rpm_release: '2'
+            rpm_release: '3'
             rpm_arch: 'x86_64'
             cache_mode: 'postinstall'
             package_name: 'racket9'
@@ -55,7 +55,7 @@ jobs:
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'fc40-x86_64-cached'
             rpm_system: 'fc40'
-            rpm_release: '2'
+            rpm_release: '3'
             rpm_arch: 'x86_64'
             cache_mode: 'cached'
             package_name: 'racket9-cached'
@@ -66,7 +66,7 @@ jobs:
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'fc43-x86_64-postinstall'
             rpm_system: 'fc43'
-            rpm_release: '2'
+            rpm_release: '3'
             rpm_arch: 'x86_64'
             cache_mode: 'postinstall'
             package_name: 'racket9'
@@ -77,7 +77,7 @@ jobs:
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'fc43-x86_64-cached'
             rpm_system: 'fc43'
-            rpm_release: '2'
+            rpm_release: '3'
             rpm_arch: 'x86_64'
             cache_mode: 'cached'
             package_name: 'racket9-cached'
@@ -88,7 +88,7 @@ jobs:
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'fc44-x86_64-postinstall'
             rpm_system: 'fc44'
-            rpm_release: '2'
+            rpm_release: '3'
             rpm_arch: 'x86_64'
             cache_mode: 'postinstall'
             package_name: 'racket9'
@@ -99,7 +99,7 @@ jobs:
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'fc44-x86_64-cached'
             rpm_system: 'fc44'
-            rpm_release: '2'
+            rpm_release: '3'
             rpm_arch: 'x86_64'
             cache_mode: 'cached'
             package_name: 'racket9-cached'
@@ -110,7 +110,7 @@ jobs:
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'openeuler2203-aarch64-postinstall'
             rpm_system: 'openeuler2203'
-            rpm_release: '2'
+            rpm_release: '3'
             rpm_arch: 'aarch64'
             cache_mode: 'postinstall'
             package_name: 'racket9'
@@ -121,7 +121,7 @@ jobs:
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'openeuler2203-aarch64-cached'
             rpm_system: 'openeuler2203'
-            rpm_release: '2'
+            rpm_release: '3'
             rpm_arch: 'aarch64'
             cache_mode: 'cached'
             package_name: 'racket9-cached'
@@ -132,7 +132,7 @@ jobs:
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'openeuler2203-x86_64-postinstall'
             rpm_system: 'openeuler2203'
-            rpm_release: '2'
+            rpm_release: '3'
             rpm_arch: 'x86_64'
             cache_mode: 'postinstall'
             package_name: 'racket9'
@@ -143,7 +143,7 @@ jobs:
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'openeuler2203-x86_64-cached'
             rpm_system: 'openeuler2203'
-            rpm_release: '2'
+            rpm_release: '3'
             rpm_arch: 'x86_64'
             cache_mode: 'cached'
             package_name: 'racket9-cached'
@@ -154,7 +154,7 @@ jobs:
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'openeuler2403-aarch64-postinstall'
             rpm_system: 'openeuler2403'
-            rpm_release: '2'
+            rpm_release: '3'
             rpm_arch: 'aarch64'
             cache_mode: 'postinstall'
             package_name: 'racket9'
@@ -165,7 +165,7 @@ jobs:
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'openeuler2403-aarch64-cached'
             rpm_system: 'openeuler2403'
-            rpm_release: '2'
+            rpm_release: '3'
             rpm_arch: 'aarch64'
             cache_mode: 'cached'
             package_name: 'racket9-cached'
@@ -176,7 +176,7 @@ jobs:
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'openeuler2403-x86_64-postinstall'
             rpm_system: 'openeuler2403'
-            rpm_release: '2'
+            rpm_release: '3'
             rpm_arch: 'x86_64'
             cache_mode: 'postinstall'
             package_name: 'racket9'
@@ -187,7 +187,7 @@ jobs:
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'openeuler2403-x86_64-cached'
             rpm_system: 'openeuler2403'
-            rpm_release: '2'
+            rpm_release: '3'
             rpm_arch: 'x86_64'
             cache_mode: 'cached'
             package_name: 'racket9-cached'
@@ -273,11 +273,19 @@ jobs:
           rpm -q libedit >/dev/null
           cache_count=$(find /var/cache/racket/compiled -path '*/compiled/*.zo' 2>/dev/null | wc -l)
           [ "$cache_count" -gt 0 ] || { echo 'system compiled cache is empty after RPM install'; exit 1; }
+          runtime_collects_cache="/var/cache/racket/compiled/usr/share/racket/collects"
+          runtime_pkgs_cache="/var/cache/racket/compiled/usr/share/racket/pkgs"
+          find "$runtime_collects_cache" -path '*/compiled/*.zo' -type f -print -quit | grep -q . \
+            || { echo "runtime-keyed collects cache is empty after RPM install: $runtime_collects_cache"; exit 1; }
+          find "$runtime_pkgs_cache" -path '*/compiled/*.zo' -type f -print -quit | grep -q . \
+            || { echo "runtime-keyed package cache is empty after RPM install: $runtime_pkgs_cache"; exit 1; }
           racket -e '(displayln (version))' | grep -F "$PACKAGE_VERSION"
           racket -e '(displayln f"rpm-ci-ok")' | grep -F 'rpm-ci-ok'
           racket -e '(require readline/readline) (displayln f"rpm-readline-ok")' | grep -F 'rpm-readline-ok'
           empty_home=$(mktemp -d)
           HOME="$empty_home" racket -e '(require racket/list racket/match racket/file) (displayln f"rpm-empty-home-ok")' | grep -F 'rpm-empty-home-ok'
+          HOME="$empty_home" rhombus --version | grep -F 'Rhombus'
+          HOME="$empty_home" rhombus -e 'println(f"rpm-rhombus-ok {1}")' | grep -F 'rpm-rhombus-ok 1'
           rm -rf "$empty_home"
           raco pkg show --all >/tmp/raco-pkgs.txt
           rpm -e "$PACKAGE_NAME"

@@ -88,6 +88,9 @@ else
   runtime_collects_cache="/var/cache/racket/compiled/${DEFAULT_PREFIX#/}/share/racket/collects"
   printf '%s\n' "$payload" | grep -F "$runtime_collects_cache/" | grep -E '[.]zo$' >/dev/null \
     || die "cached RPM payload does not include runtime-keyed collects cache .zo files"
+  runtime_pkgs_cache="/var/cache/racket/compiled/${DEFAULT_PREFIX#/}/share/racket/pkgs"
+  printf '%s\n' "$payload" | grep -F "$runtime_pkgs_cache/" | grep -E '[.]zo$' >/dev/null \
+    || die "cached RPM payload does not include runtime-keyed package cache .zo files"
 fi
 scripts=$(rpm -qp --scripts "$RPM_PATH")
 if [ "$CACHE_MODE" = postinstall ]; then
