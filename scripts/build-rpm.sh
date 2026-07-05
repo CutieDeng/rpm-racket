@@ -21,6 +21,7 @@ Options:
   --work-dir PATH        Build work directory for rpmbuild.
   --rpm-system SYSTEM    el9, fc40, fc43, fc44, openeuler2203, or openeuler2403.
   --rpm-release RELEASE  Package release base, for example 1. The system suffix is appended separately.
+  --cache-mode MODE      postinstall or cached. Defaults to postinstall.
   --prefix PATH          Install prefix inside the package. Defaults to generated /usr.
   --rpm-arch ARCH        x86_64, amd64, x64, aarch64, or arm64.
   --jobs N               Parallel jobs passed to rpmbuild through _smp_mflags.
@@ -40,6 +41,7 @@ RPM_RELEASE=
 RPM_ARCH=
 JOBS=1
 PREFIX="$DEFAULT_PREFIX"
+CACHE_MODE="$DEFAULT_CACHE_MODE"
 RPMBUILD_ARGS=()
 
 while [ $# -gt 0 ]; do
@@ -50,6 +52,7 @@ while [ $# -gt 0 ]; do
     --work-dir) [ $# -ge 2 ] || usage_error "missing value for --work-dir"; WORK_DIR="$2"; shift 2 ;;
     --rpm-system) [ $# -ge 2 ] || usage_error "missing value for --rpm-system"; RPM_SYSTEM="$2"; shift 2 ;;
     --rpm-release) [ $# -ge 2 ] || usage_error "missing value for --rpm-release"; RPM_RELEASE="$2"; shift 2 ;;
+    --cache-mode) [ $# -ge 2 ] || usage_error "missing value for --cache-mode"; CACHE_MODE="$2"; shift 2 ;;
     --prefix) [ $# -ge 2 ] || usage_error "missing value for --prefix"; PREFIX="$2"; shift 2 ;;
     --rpm-arch) [ $# -ge 2 ] || usage_error "missing value for --rpm-arch"; RPM_ARCH="$2"; shift 2 ;;
     --jobs) [ $# -ge 2 ] || usage_error "missing value for --jobs"; JOBS="$2"; shift 2 ;;
@@ -69,7 +72,9 @@ require_repo_root "$REPO_ROOT"
 [ -n "$RPM_ARCH" ] || usage_error "--rpm-arch is required"
 validate_rpm_system "$RPM_SYSTEM"
 validate_rpm_release "$RPM_RELEASE"
+validate_cache_mode "$CACHE_MODE"
 NORMALIZED_ARCH=$(normalize_arch "$RPM_ARCH")
+RPM_PACKAGE_NAME=$(package_name_for_cache_mode "$CACHE_MODE")
 if [ -n "$SOURCE_ARCHIVE" ] && [ "$SOURCE_URL_EXPLICIT" = 1 ]; then
   usage_error "use either --source-archive or --source-url, not both"
 fi
@@ -82,13 +87,15 @@ RPMBUILD_ROOT="$WORK_DIR/rpmbuild"
 SPEC_PATH="$RPMBUILD_ROOT/SPECS/$SPEC_NAME"
 SOURCE_PATH="$RPMBUILD_ROOT/SOURCES/$SOURCE_ARCHIVE_NAME"
 RPM_FULL_RELEASE=$(rpm_full_release "$RPM_RELEASE" "$RPM_SYSTEM")
-RPM_NAME=$(rpm_name_for_arch "$NORMALIZED_ARCH" "$RPM_RELEASE" "$RPM_SYSTEM")
+RPM_NAME=$(rpm_name_for_arch "$NORMALIZED_ARCH" "$RPM_RELEASE" "$RPM_SYSTEM" "$CACHE_MODE")
 RPM_OUTPUT="$RPMBUILD_ROOT/RPMS/$NORMALIZED_ARCH/$RPM_NAME"
 
 printf 'Repository root: %s\n' "$REPO_ROOT"
 printf 'RPM system: %s\n' "$RPM_SYSTEM"
 printf 'RPM release: %s\n' "$RPM_RELEASE"
 printf 'RPM full release: %s\n' "$RPM_FULL_RELEASE"
+printf 'RPM cache mode: %s\n' "$CACHE_MODE"
+printf 'RPM package name: %s\n' "$RPM_PACKAGE_NAME"
 printf 'Source archive: %s\n' "${SOURCE_ARCHIVE:-$SOURCE_URL}"
 printf 'RPM output: %s\n' "$ARTIFACT_DIR/$RPM_NAME"
 
@@ -102,6 +109,8 @@ if [ "${#RPMBUILD_ARGS[@]}" -gt 0 ]; then
     --define "_topdir $RPMBUILD_ROOT" \
     --define "_build_id_links none" \
     --define "package_prefix $PREFIX" \
+    --define "package_name $RPM_PACKAGE_NAME" \
+    --define "cache_mode $CACHE_MODE" \
     --define "package_system $RPM_SYSTEM" \
     --define "package_release $RPM_RELEASE" \
     --define "_smp_mflags -j$JOBS" \
@@ -112,6 +121,8 @@ else
     --define "_topdir $RPMBUILD_ROOT" \
     --define "_build_id_links none" \
     --define "package_prefix $PREFIX" \
+    --define "package_name $RPM_PACKAGE_NAME" \
+    --define "cache_mode $CACHE_MODE" \
     --define "package_system $RPM_SYSTEM" \
     --define "package_release $RPM_RELEASE" \
     --define "_smp_mflags -j$JOBS" \
@@ -124,6 +135,6 @@ else
   require_nonempty_file "$RPM_OUTPUT"
   mkdir -p "$ARTIFACT_DIR"
   cp "$RPM_OUTPUT" "$ARTIFACT_DIR/$RPM_NAME"
-  "$REPO_ROOT/scripts/verify-rpm.sh" --rpm "$ARTIFACT_DIR/$RPM_NAME" --rpm-system "$RPM_SYSTEM" --rpm-release "$RPM_RELEASE" --rpm-arch "$NORMALIZED_ARCH"
+  "$REPO_ROOT/scripts/verify-rpm.sh" --rpm "$ARTIFACT_DIR/$RPM_NAME" --rpm-system "$RPM_SYSTEM" --rpm-release "$RPM_RELEASE" --rpm-arch "$NORMALIZED_ARCH" --cache-mode "$CACHE_MODE"
   printf 'RPM package: %s\n' "$ARTIFACT_DIR/$RPM_NAME"
 fi

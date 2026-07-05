@@ -1,7 +1,11 @@
-Name: racket9
+%{!?package_name:%global package_name racket9}
+%{!?cache_mode:%global cache_mode postinstall}
+%global base_package_name racket9
+%global cached_package_name racket9-cached
+Name: %{package_name}
 Version: 9.2.2
 %{!?package_system:%global package_system openeuler2403}
-%{!?package_release:%global package_release 1}
+%{!?package_release:%global package_release 2}
 Release: %{package_release}.%{package_system}
 Summary: Racket programming language
 License: MIT OR Apache-2.0
@@ -9,13 +13,19 @@ URL: https://racket-lang.org/
 Source0: https://github.com/CutieDeng/racket/releases/download/v9.2.2/racket-minimal-9.2.2-src.tgz
 AutoReqProv: no
 Requires: libedit
+%if "%{cache_mode}" == "cached"
+Provides: %{base_package_name} = %{version}-%{release}
+Conflicts: %{base_package_name}
+%else
+Conflicts: %{cached_package_name}
+%endif
 # Racket CS stores its boot image in the .rackboot ELF section. RPM debuginfo
 # extraction removes that section on openEuler, so the package must keep debug
 # data in the main executables.
 %global debug_package %{nil}
 %global __brp_compress %{nil}
 %global package_prefix /usr
-%global source_sha256 ecd74fcdab8d44816e2d9dd4f995de875d6b888367ee1ddef32bc06f25e4ac09
+%global source_sha256 fc25e3ca9996f96b41edac3ab2d1517a8c42e2d0ed9107b81252bcd62895669e
 
 %description
 Racket packaged from a stable source release archive.
@@ -57,6 +67,30 @@ cd src
 make install DESTDIR=%{buildroot}
 cd ..
 find "%{buildroot}" -type d -name compiled ! -path '*/info-domain/compiled' -prune -exec rm -rf {} +
+%if "%{cache_mode}" == "cached"
+config_dir="%{buildroot}%{_sysconfdir}/racket"
+config_file="$config_dir/config.rktd"
+runtime_cache_root="/var/cache/racket/compiled"
+staged_cache_root="%{buildroot}$runtime_cache_root"
+racket_bin="%{buildroot}%{package_prefix}/bin/racket"
+backup="$config_file.package-racket-cache-backup"
+[ -f "$config_file" ] || { echo "missing staged config: $config_file" >&2; exit 1; }
+[ -x "$racket_bin" ] || { echo "missing staged racket: $racket_bin" >&2; exit 1; }
+cp "$config_file" "$backup"
+escaped_runtime=$(printf '%s\n' "$runtime_cache_root" | sed 's/[&|]/\\&/g')
+escaped_staged=$(printf '%s\n' "$staged_cache_root" | sed 's/[&|]/\\&/g')
+grep -F "$runtime_cache_root" "$config_file" >/dev/null || { echo "config missing runtime cache root" >&2; exit 1; }
+sed -i "s|$escaped_runtime|$escaped_staged|g" "$config_file"
+mkdir -p "$staged_cache_root"
+if ! "$racket_bin" -G "$config_dir" -N raco -l- raco setup --system --no-user --reset-cache -D --no-pkg-deps; then
+  cp "$backup" "$config_file"
+  rm -f "$backup"
+  exit 1
+fi
+cp "$backup" "$config_file"
+rm -f "$backup"
+find "$staged_cache_root" -path '*/compiled/*.zo' -type f -print -quit | grep -q . || { echo "staged system compiled cache is empty: $staged_cache_root" >&2; exit 1; }
+%endif
 
 manifest="%{name}.files"
 paths="%{name}.paths"
@@ -79,13 +113,17 @@ while IFS= read -r path; do
 done < "$paths"
 grep -Eq '^(%dir )?(/bin|/boot|/dev|/etc|/lib|/lib64|/opt|/run|/sbin|/usr|/usr/bin|/usr/etc|/usr/games|/usr/include|/usr/lib|/usr/lib64|/usr/libexec|/usr/local|/usr/sbin|/usr/share|/usr/share/applications|/usr/share/doc|/usr/share/icons|/usr/share/icons/hicolor|/usr/share/man|/usr/share/man/man1|/usr/share/man/man2|/usr/share/man/man3|/usr/share/man/man4|/usr/share/man/man5|/usr/share/man/man6|/usr/share/man/man7|/usr/share/man/man8|/var)$' "$manifest" && exit 1
 
+%if "%{cache_mode}" == "postinstall"
 %posttrans
 raco setup --system --no-user --reset-cache -D --no-pkg-deps
+%endif
 
+%if "%{cache_mode}" == "postinstall"
 %preun
 if [ "$1" = "0" ] && command -v raco >/dev/null 2>&1; then
   raco setup --system --delete-cache || :
 fi
+%endif
 
 %postun
 if [ "$1" = "0" ]; then

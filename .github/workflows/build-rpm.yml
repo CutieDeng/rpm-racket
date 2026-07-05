@@ -15,82 +15,186 @@ permissions:
 
 jobs:
   build-rpm:
-    name: build ${{ matrix.rpm_system }} ${{ matrix.rpm_arch }}
+    name: build ${{ matrix.rpm_system }} ${{ matrix.rpm_arch }} ${{ matrix.cache_mode }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          - id: 'el9-x86_64'
+          - id: 'el9-x86_64-postinstall'
             rpm_system: 'el9'
-            rpm_release: '1'
+            rpm_release: '2'
             rpm_arch: 'x86_64'
+            cache_mode: 'postinstall'
+            package_name: 'racket9'
             runner: 'ubuntu-24.04'
             container: 'quay.io/centos/centos:stream9'
             jobs: 2
-            artifact_name: 'rpm-el9-x86_64'
+            artifact_name: 'rpm-el9-x86_64-postinstall'
             setup_packages: 'bash diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
-          - id: 'fc40-x86_64'
-            rpm_system: 'fc40'
-            rpm_release: '1'
+          - id: 'el9-x86_64-cached'
+            rpm_system: 'el9'
+            rpm_release: '2'
             rpm_arch: 'x86_64'
+            cache_mode: 'cached'
+            package_name: 'racket9-cached'
+            runner: 'ubuntu-24.04'
+            container: 'quay.io/centos/centos:stream9'
+            jobs: 2
+            artifact_name: 'rpm-el9-x86_64-cached'
+            setup_packages: 'bash diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
+          - id: 'fc40-x86_64-postinstall'
+            rpm_system: 'fc40'
+            rpm_release: '2'
+            rpm_arch: 'x86_64'
+            cache_mode: 'postinstall'
+            package_name: 'racket9'
             runner: 'ubuntu-24.04'
             container: 'fedora:40'
             jobs: 2
-            artifact_name: 'rpm-fc40-x86_64'
+            artifact_name: 'rpm-fc40-x86_64-postinstall'
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
-          - id: 'fc43-x86_64'
-            rpm_system: 'fc43'
-            rpm_release: '1'
+          - id: 'fc40-x86_64-cached'
+            rpm_system: 'fc40'
+            rpm_release: '2'
             rpm_arch: 'x86_64'
+            cache_mode: 'cached'
+            package_name: 'racket9-cached'
+            runner: 'ubuntu-24.04'
+            container: 'fedora:40'
+            jobs: 2
+            artifact_name: 'rpm-fc40-x86_64-cached'
+            setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
+          - id: 'fc43-x86_64-postinstall'
+            rpm_system: 'fc43'
+            rpm_release: '2'
+            rpm_arch: 'x86_64'
+            cache_mode: 'postinstall'
+            package_name: 'racket9'
             runner: 'ubuntu-24.04'
             container: 'fedora:43'
             jobs: 2
-            artifact_name: 'rpm-fc43-x86_64'
+            artifact_name: 'rpm-fc43-x86_64-postinstall'
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
-          - id: 'fc44-x86_64'
-            rpm_system: 'fc44'
-            rpm_release: '1'
+          - id: 'fc43-x86_64-cached'
+            rpm_system: 'fc43'
+            rpm_release: '2'
             rpm_arch: 'x86_64'
+            cache_mode: 'cached'
+            package_name: 'racket9-cached'
+            runner: 'ubuntu-24.04'
+            container: 'fedora:43'
+            jobs: 2
+            artifact_name: 'rpm-fc43-x86_64-cached'
+            setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
+          - id: 'fc44-x86_64-postinstall'
+            rpm_system: 'fc44'
+            rpm_release: '2'
+            rpm_arch: 'x86_64'
+            cache_mode: 'postinstall'
+            package_name: 'racket9'
             runner: 'ubuntu-24.04'
             container: 'fedora:44'
             jobs: 2
-            artifact_name: 'rpm-fc44-x86_64'
+            artifact_name: 'rpm-fc44-x86_64-postinstall'
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
-          - id: 'openeuler2203-aarch64'
+          - id: 'fc44-x86_64-cached'
+            rpm_system: 'fc44'
+            rpm_release: '2'
+            rpm_arch: 'x86_64'
+            cache_mode: 'cached'
+            package_name: 'racket9-cached'
+            runner: 'ubuntu-24.04'
+            container: 'fedora:44'
+            jobs: 2
+            artifact_name: 'rpm-fc44-x86_64-cached'
+            setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
+          - id: 'openeuler2203-aarch64-postinstall'
             rpm_system: 'openeuler2203'
-            rpm_release: '1'
+            rpm_release: '2'
             rpm_arch: 'aarch64'
+            cache_mode: 'postinstall'
+            package_name: 'racket9'
             runner: 'ubuntu-24.04-arm'
             container: 'openeuler/openeuler:22.03-lts'
             jobs: 2
-            artifact_name: 'rpm-openeuler2203-aarch64'
+            artifact_name: 'rpm-openeuler2203-aarch64-postinstall'
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
-          - id: 'openeuler2203-x86_64'
+          - id: 'openeuler2203-aarch64-cached'
             rpm_system: 'openeuler2203'
-            rpm_release: '1'
+            rpm_release: '2'
+            rpm_arch: 'aarch64'
+            cache_mode: 'cached'
+            package_name: 'racket9-cached'
+            runner: 'ubuntu-24.04-arm'
+            container: 'openeuler/openeuler:22.03-lts'
+            jobs: 2
+            artifact_name: 'rpm-openeuler2203-aarch64-cached'
+            setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
+          - id: 'openeuler2203-x86_64-postinstall'
+            rpm_system: 'openeuler2203'
+            rpm_release: '2'
             rpm_arch: 'x86_64'
+            cache_mode: 'postinstall'
+            package_name: 'racket9'
             runner: 'ubuntu-24.04'
             container: 'openeuler/openeuler:22.03-lts'
             jobs: 2
-            artifact_name: 'rpm-openeuler2203-x86_64'
+            artifact_name: 'rpm-openeuler2203-x86_64-postinstall'
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
-          - id: 'openeuler2403-aarch64'
+          - id: 'openeuler2203-x86_64-cached'
+            rpm_system: 'openeuler2203'
+            rpm_release: '2'
+            rpm_arch: 'x86_64'
+            cache_mode: 'cached'
+            package_name: 'racket9-cached'
+            runner: 'ubuntu-24.04'
+            container: 'openeuler/openeuler:22.03-lts'
+            jobs: 2
+            artifact_name: 'rpm-openeuler2203-x86_64-cached'
+            setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
+          - id: 'openeuler2403-aarch64-postinstall'
             rpm_system: 'openeuler2403'
-            rpm_release: '1'
+            rpm_release: '2'
             rpm_arch: 'aarch64'
+            cache_mode: 'postinstall'
+            package_name: 'racket9'
             runner: 'ubuntu-24.04-arm'
             container: 'openeuler/openeuler:24.03-lts'
             jobs: 2
-            artifact_name: 'rpm-openeuler2403-aarch64'
+            artifact_name: 'rpm-openeuler2403-aarch64-postinstall'
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
-          - id: 'openeuler2403-x86_64'
+          - id: 'openeuler2403-aarch64-cached'
             rpm_system: 'openeuler2403'
-            rpm_release: '1'
+            rpm_release: '2'
+            rpm_arch: 'aarch64'
+            cache_mode: 'cached'
+            package_name: 'racket9-cached'
+            runner: 'ubuntu-24.04-arm'
+            container: 'openeuler/openeuler:24.03-lts'
+            jobs: 2
+            artifact_name: 'rpm-openeuler2403-aarch64-cached'
+            setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
+          - id: 'openeuler2403-x86_64-postinstall'
+            rpm_system: 'openeuler2403'
+            rpm_release: '2'
             rpm_arch: 'x86_64'
+            cache_mode: 'postinstall'
+            package_name: 'racket9'
             runner: 'ubuntu-24.04'
             container: 'openeuler/openeuler:24.03-lts'
             jobs: 2
-            artifact_name: 'rpm-openeuler2403-x86_64'
+            artifact_name: 'rpm-openeuler2403-x86_64-postinstall'
+            setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
+          - id: 'openeuler2403-x86_64-cached'
+            rpm_system: 'openeuler2403'
+            rpm_release: '2'
+            rpm_arch: 'x86_64'
+            cache_mode: 'cached'
+            package_name: 'racket9-cached'
+            runner: 'ubuntu-24.04'
+            container: 'openeuler/openeuler:24.03-lts'
+            jobs: 2
+            artifact_name: 'rpm-openeuler2403-x86_64-cached'
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
     runs-on: ${{ matrix.runner }}
     container:
@@ -140,13 +244,14 @@ jobs:
             --rpm-system "${{ matrix.rpm_system }}" \
             --rpm-release "${{ matrix.rpm_release }}" \
             --rpm-arch "${{ matrix.rpm_arch }}" \
+            --cache-mode "${{ matrix.cache_mode }}" \
             --prefix '/usr' \
             --jobs "${{ matrix.jobs }}"
 
       - name: Install and uninstall smoke test
         shell: bash
         env:
-          PACKAGE_NAME: 'racket9'
+          PACKAGE_NAME: ${{ matrix.package_name }}
           PACKAGE_VERSION: '9.2.2'
         run: |
           set -euo pipefail
@@ -213,7 +318,7 @@ jobs:
           CREATE_RELEASE: 'true'
           PACKAGE_NAME: 'racket9'
           PACKAGE_VERSION: '9.2.2'
-          EXPECTED_RPM_COUNT: 8
+          EXPECTED_RPM_COUNT: 16
         run: |
           set -euo pipefail
           command -v gh >/dev/null 2>&1 || { echo 'gh CLI is required on the publish runner'; exit 1; }

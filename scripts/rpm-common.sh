@@ -4,15 +4,18 @@ set -euo pipefail
 # GENERATED RPM PACKAGING METADATA - DO NOT EDIT IN rpm-racket.
 # Generated entrypoint: rpm-common.sh
 
-PACKAGE_NAME='racket9'
+BASE_PACKAGE_NAME='racket9'
+CACHED_PACKAGE_NAME='racket9-cached'
+PACKAGE_NAME="$BASE_PACKAGE_NAME"
 PACKAGE_VERSION='9.2.2'
 PACKAGE_SOURCE_VERSION='9.2.2'
 DEFAULT_RPM_SYSTEM='openeuler2403'
-DEFAULT_RPM_RELEASE='1'
+DEFAULT_RPM_RELEASE='2'
 DEFAULT_PREFIX='/usr'
+DEFAULT_CACHE_MODE=postinstall
 SOURCE_ARCHIVE_NAME='racket-minimal-9.2.2-src.tgz'
 DEFAULT_SOURCE_URL='https://github.com/CutieDeng/racket/releases/download/v9.2.2/racket-minimal-9.2.2-src.tgz'
-SOURCE_SHA256='ecd74fcdab8d44816e2d9dd4f995de875d6b888367ee1ddef32bc06f25e4ac09'
+SOURCE_SHA256='fc25e3ca9996f96b41edac3ab2d1517a8c42e2d0ed9107b81252bcd62895669e'
 SPEC_NAME='racket9.spec'
 
 die() {
@@ -117,6 +120,22 @@ validate_rpm_release() {
   esac
 }
 
+validate_cache_mode() {
+  case "$1" in
+    postinstall|cached) ;;
+    *) die "cache mode must be postinstall or cached: $1" ;;
+  esac
+}
+
+package_name_for_cache_mode() {
+  local mode="$1"
+  validate_cache_mode "$mode"
+  case "$mode" in
+    postinstall) printf '%s\n' "$BASE_PACKAGE_NAME" ;;
+    cached) printf '%s\n' "$CACHED_PACKAGE_NAME" ;;
+  esac
+}
+
 rpm_full_release() {
   local release="$1"
   local system="$2"
@@ -127,7 +146,10 @@ rpm_name_for_arch() {
   local arch="$1"
   local release="$2"
   local system="$3"
-  printf '%s-%s-%s.%s.rpm\n' "$PACKAGE_NAME" "$PACKAGE_VERSION" "$(rpm_full_release "$release" "$system")" "$arch"
+  local mode="${4:-$DEFAULT_CACHE_MODE}"
+  local package_name
+  package_name=$(package_name_for_cache_mode "$mode")
+  printf '%s-%s-%s.%s.rpm\n' "$package_name" "$PACKAGE_VERSION" "$(rpm_full_release "$release" "$system")" "$arch"
 }
 
 srpm_name() {
