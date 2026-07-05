@@ -72,6 +72,9 @@ printf '%s\n' "$metadata" | grep -F "Release     : $RPM_FULL_RELEASE" >/dev/null
 printf '%s\n' "$metadata" | grep -F "Architecture: $NORMALIZED_ARCH" >/dev/null || die "RPM metadata missing expected architecture"
 
 payload=$(rpm -qpl "$RPM_PATH")
+if printf '%s\n' "$payload" | grep -Fx '/var/cache/racket/racket-compiled-cache.log' >/dev/null; then
+  die "RPM payload unexpectedly includes racket compiled cache debug log"
+fi
 if printf '%s\n' "$payload" | grep -Eq '^/usr$|^/usr/(bin|lib|lib64|share)$'; then
   die "RPM payload claims shared /usr parent directory"
 fi
@@ -82,6 +85,9 @@ if [ "$CACHE_MODE" = postinstall ]; then
 else
   printf '%s\n' "$payload" | grep -E '^/var/cache/racket/compiled/.+[.]zo$' >/dev/null \
     || die "cached RPM payload does not include system compiled cache .zo files"
+  runtime_collects_cache="/var/cache/racket/compiled/${DEFAULT_PREFIX#/}/share/racket/collects"
+  printf '%s\n' "$payload" | grep -F "$runtime_collects_cache/" | grep -E '[.]zo$' >/dev/null \
+    || die "cached RPM payload does not include runtime-keyed collects cache .zo files"
 fi
 scripts=$(rpm -qp --scripts "$RPM_PATH")
 if [ "$CACHE_MODE" = postinstall ]; then

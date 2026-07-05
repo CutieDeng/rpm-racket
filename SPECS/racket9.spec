@@ -91,7 +91,28 @@ if ! "$racket_bin" -X "$collects_dir" -G "$config_dir" -N raco -l- raco setup --
 fi
 cp "$backup" "$config_file"
 rm -f "$backup"
-find "$staged_cache_root" -path '*/compiled/*.zo' -type f -print -quit | grep -q . || { echo "staged system compiled cache is empty: $staged_cache_root" >&2; exit 1; }
+move_cache_tree() {
+  from_source="$1"
+  to_source="$2"
+  from="$staged_cache_root/${from_source#/}"
+  to="$staged_cache_root/${to_source#/}"
+  [ -e "$from" ] || return 0
+  [ "$from" = "$to" ] && return 0
+  mkdir -p "$(dirname "$to")"
+  if [ -e "$to" ]; then
+    cp -a "$from"/. "$to"/
+    rm -rf "$from"
+  else
+    mv "$from" "$to"
+  fi
+}
+runtime_collects_dir="%{package_prefix}/share/racket/collects"
+move_cache_tree "$collects_dir" "$runtime_collects_dir"
+move_cache_tree "%{buildroot}%{package_prefix}/share/racket/pkgs" "%{package_prefix}/share/racket/pkgs"
+rm -f "%{buildroot}/var/cache/racket/racket-compiled-cache.log"
+find "$staged_cache_root" -type d -empty -delete 2>/dev/null || :
+runtime_collects_cache="$staged_cache_root/${runtime_collects_dir#/}"
+find "$runtime_collects_cache" -path '*/compiled/*.zo' -type f -print -quit | grep -q . || { echo "runtime-keyed staged system compiled cache is empty: $runtime_collects_cache" >&2; exit 1; }
 %endif
 
 manifest="%{name}.files"
@@ -117,7 +138,18 @@ grep -Eq '^(%dir )?(/bin|/boot|/dev|/etc|/lib|/lib64|/opt|/run|/sbin|/usr|/usr/b
 
 %if "%{cache_mode}" == "postinstall"
 %posttrans
-raco setup --system --no-user --reset-cache -D --no-pkg-deps
+setup_jobs=
+if [ -r /etc/os-release ]; then
+  . /etc/os-release
+  if [ "${ID:-}" = "fedora" ] && [ "${VERSION_ID:-}" = "44" ]; then
+    setup_jobs="-j 1"
+  fi
+fi
+if [ -n "$setup_jobs" ]; then
+  raco setup $setup_jobs --system --no-user --reset-cache -D --no-pkg-deps
+else
+  raco setup --system --no-user --reset-cache -D --no-pkg-deps
+fi
 %endif
 
 %if "%{cache_mode}" == "postinstall"
