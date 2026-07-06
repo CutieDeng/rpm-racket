@@ -70,67 +70,51 @@ find "%{buildroot}" -type d -name compiled ! -path '*/info-domain/compiled' -pru
 %if "%{cache_mode}" == "cached"
 config_dir="%{buildroot}%{_sysconfdir}/racket"
 config_file="$config_dir/config.rktd"
+runtime_config_dir="%{_sysconfdir}/racket"
+runtime_cache_parent="/var/cache/racket"
 runtime_cache_root="/var/cache/racket/compiled"
+staged_cache_parent="%{buildroot}$runtime_cache_parent"
 staged_cache_root="%{buildroot}$runtime_cache_root"
 racket_bin="%{buildroot}%{package_prefix}/bin/racket"
-collects_dir="%{buildroot}%{package_prefix}/share/racket/collects"
-backup="$config_file.package-racket-cache-backup"
+runtime_share_dir="%{package_prefix}/share/racket"
+runtime_collects_dir="$runtime_share_dir/collects"
+runtime_lib_dir="%{package_prefix}/lib/racket"
+runtime_links=
 [ -f "$config_file" ] || { echo "missing staged config: $config_file" >&2; exit 1; }
 [ -x "$racket_bin" ] || { echo "missing staged racket: $racket_bin" >&2; exit 1; }
-[ -d "$collects_dir" ] || { echo "missing staged collects: $collects_dir" >&2; exit 1; }
-cp "$config_file" "$backup"
-	escape_config_sed_pattern() {
-	  printf '%s\n' "$1" | sed 's/[][\\.^$*|]/\\&/g'
-	}
-	escape_config_sed_replacement() {
-	  printf '%s\n' "$1" | sed 's/[\\&|]/\\&/g'
-	}
-	replace_config_value() {
-	  replace_config_file="$1"
-	  replace_config_key="$2"
-	  replace_config_from="$3"
-	  replace_config_to="$4"
-	  replace_config_required="$5"
-	  replace_config_needle="($replace_config_key . \"$replace_config_from\")"
-	  replace_config_replacement="($replace_config_key . \"$replace_config_to\")"
-	  if ! grep -F "$replace_config_needle" "$replace_config_file" >/dev/null; then
-	    if [ "$replace_config_required" = required ]; then
-	      echo "config does not contain expected $replace_config_key value $replace_config_from: $replace_config_file" >&2
-	      exit 1
-	    fi
-	    return 0
-	  fi
-	  replace_config_needle=$(escape_config_sed_pattern "$replace_config_needle")
-	  replace_config_replacement=$(escape_config_sed_replacement "$replace_config_replacement")
-	  replace_config_tmp="$replace_config_file.package-racket-rewrite.$$"
-	  sed "s|$replace_config_needle|$replace_config_replacement|g" "$replace_config_file" > "$replace_config_tmp" || { rm -f "$replace_config_tmp"; exit 1; }
-	  mv "$replace_config_tmp" "$replace_config_file"
-	}
-	write_staged_config() {
-	  replace_config_file="$1"
-	  replace_config_stage_root="$2"
-	  replace_config_prefix="$3"
-	  replace_config_runtime_cache_root="$4"
-	  replace_config_staged_cache_root="$5"
-	  replace_config_value "$replace_config_file" compiled-file-system-cache-root "$replace_config_runtime_cache_root" "$replace_config_staged_cache_root" required
-	  replace_config_value "$replace_config_file" share-dir "$replace_config_prefix/share/racket" "$replace_config_stage_root$replace_config_prefix/share/racket" optional
-	  replace_config_value "$replace_config_file" pkgs-dir "$replace_config_prefix/share/racket/pkgs" "$replace_config_stage_root$replace_config_prefix/share/racket/pkgs" optional
-	  replace_config_value "$replace_config_file" doc-dir "$replace_config_prefix/share/doc/racket" "$replace_config_stage_root$replace_config_prefix/share/doc/racket" optional
-	  replace_config_value "$replace_config_file" lib-dir "$replace_config_prefix/lib/racket" "$replace_config_stage_root$replace_config_prefix/lib/racket" optional
-	  replace_config_value "$replace_config_file" include-dir "$replace_config_prefix/include/racket" "$replace_config_stage_root$replace_config_prefix/include/racket" optional
-	  replace_config_value "$replace_config_file" bin-dir "$replace_config_prefix/bin" "$replace_config_stage_root$replace_config_prefix/bin" optional
-	  replace_config_value "$replace_config_file" apps-dir "$replace_config_prefix/share/applications" "$replace_config_stage_root$replace_config_prefix/share/applications" optional
-	  replace_config_value "$replace_config_file" man-dir "$replace_config_prefix/share/man" "$replace_config_stage_root$replace_config_prefix/share/man" optional
-	}
-	write_staged_config "$config_file" "%{buildroot}" "%{package_prefix}" "$runtime_cache_root" "$staged_cache_root"
-mkdir -p "$staged_cache_root"
-if ! "$racket_bin" -X "$collects_dir" -G "$config_dir" -N raco -l- raco setup --system --no-user --reset-cache -D --no-pkg-deps; then
-  cp "$backup" "$config_file"
-  rm -f "$backup"
+[ -d "%{buildroot}$runtime_collects_dir" ] || { echo "missing staged collects: %{buildroot}$runtime_collects_dir" >&2; exit 1; }
+[ -d "%{buildroot}$runtime_lib_dir" ] || { echo "missing staged Racket lib directory: %{buildroot}$runtime_lib_dir" >&2; exit 1; }
+cleanup_runtime_links() {
+  if [ -n "${runtime_links:-}" ]; then
+    printf '%s\n' "$runtime_links" | while IFS= read -r runtime_link; do
+      [ -n "$runtime_link" ] || continue
+      [ -L "$runtime_link" ] && rm -f "$runtime_link"
+    done
+  fi
+}
+add_runtime_link() {
+  runtime_link_target="$1"
+  runtime_link_path="$2"
+  if [ -e "$runtime_link_path" ] || [ -L "$runtime_link_path" ]; then
+    echo "runtime staging link path already exists: $runtime_link_path" >&2
+    exit 1
+  fi
+  mkdir -p "$(dirname "$runtime_link_path")"
+  ln -s "$runtime_link_target" "$runtime_link_path"
+  runtime_links="$runtime_link_path
+$runtime_links"
+}
+mkdir -p "$staged_cache_parent"
+trap cleanup_runtime_links EXIT
+add_runtime_link "%{buildroot}$runtime_share_dir" "$runtime_share_dir"
+add_runtime_link "%{buildroot}$runtime_lib_dir" "$runtime_lib_dir"
+add_runtime_link "$config_dir" "$runtime_config_dir"
+add_runtime_link "$staged_cache_parent" "$runtime_cache_parent"
+if ! "$racket_bin" -X "$runtime_collects_dir" -G "$runtime_config_dir" -N raco -l- raco setup --system --no-user --reset-cache -D --no-pkg-deps --no-launcher; then
   exit 1
 fi
-cp "$backup" "$config_file"
-rm -f "$backup"
+cleanup_runtime_links
+trap - EXIT
 move_cache_tree() {
   from_source="$1"
   to_source="$2"
@@ -148,7 +132,7 @@ move_cache_tree() {
 }
 runtime_collects_dir="%{package_prefix}/share/racket/collects"
 runtime_pkgs_dir="%{package_prefix}/share/racket/pkgs"
-move_cache_tree "$collects_dir" "$runtime_collects_dir"
+move_cache_tree "%{buildroot}$runtime_collects_dir" "$runtime_collects_dir"
 move_cache_tree "%{buildroot}$runtime_pkgs_dir" "$runtime_pkgs_dir"
 rm -f "%{buildroot}/var/cache/racket/racket-compiled-cache.log"
 find "$staged_cache_root" -type d -empty -delete 2>/dev/null || :
