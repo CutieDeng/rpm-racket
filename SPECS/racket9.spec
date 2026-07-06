@@ -5,7 +5,7 @@
 Name: %{package_name}
 Version: 9.2.2
 %{!?package_system:%global package_system openeuler2403}
-%{!?package_release:%global package_release 3}
+%{!?package_release:%global package_release 4}
 Release: %{package_release}.%{package_system}
 Summary: Racket programming language
 License: MIT OR Apache-2.0
@@ -79,42 +79,50 @@ backup="$config_file.package-racket-cache-backup"
 [ -x "$racket_bin" ] || { echo "missing staged racket: $racket_bin" >&2; exit 1; }
 [ -d "$collects_dir" ] || { echo "missing staged collects: $collects_dir" >&2; exit 1; }
 cp "$config_file" "$backup"
-"$racket_bin" -X "$collects_dir" -G "$config_dir" -e '
-(let ()
-  (define args (current-command-line-arguments))
-  (define config-file (vector-ref args 0))
-  (define stage-root (vector-ref args 1))
-  (define prefix (vector-ref args 2))
-  (define runtime-cache-root (vector-ref args 3))
-  (define staged-cache-root (vector-ref args 4))
-  (define config (call-with-input-file config-file read))
-  (unless (hash? config)
-    (error (quote rpm-staged-config) "expected config.rktd to contain a hash" config-file))
-  (unless (equal? (hash-ref config (quote compiled-file-system-cache-root) #f)
-                  runtime-cache-root)
-    (error (quote rpm-staged-config) "config missing expected runtime cache root" runtime-cache-root))
-  (define (staged-path suffix)
-    (string-append stage-root prefix suffix))
-  (define updates
-    (hash (quote compiled-file-system-cache-root) staged-cache-root
-          (quote share-dir) (staged-path "/share/racket")
-          (quote pkgs-dir) (staged-path "/share/racket/pkgs")
-          (quote doc-dir) (staged-path "/share/doc/racket")
-          (quote lib-dir) (staged-path "/lib/racket")
-          (quote include-dir) (staged-path "/include/racket")
-          (quote bin-dir) (staged-path "/bin")
-          (quote apps-dir) (staged-path "/share/applications")
-          (quote man-dir) (staged-path "/share/man")))
-  (define staged-config
-    (for/fold ([config config]) ([(key value) (in-hash updates)])
-      (if (hash-has-key? config key)
-          (hash-set config key value)
-          config)))
-  (call-with-output-file config-file
-    #:exists (quote truncate/replace)
-    (lambda (out)
-      (write staged-config out)
-      (newline out))))' -- "$config_file" "%{buildroot}" "%{package_prefix}" "$runtime_cache_root" "$staged_cache_root"
+	escape_config_sed_pattern() {
+	  printf '%s\n' "$1" | sed 's/[][\\.^$*|]/\\&/g'
+	}
+	escape_config_sed_replacement() {
+	  printf '%s\n' "$1" | sed 's/[\\&|]/\\&/g'
+	}
+	replace_config_value() {
+	  replace_config_file="$1"
+	  replace_config_key="$2"
+	  replace_config_from="$3"
+	  replace_config_to="$4"
+	  replace_config_required="$5"
+	  replace_config_needle="($replace_config_key . \"$replace_config_from\")"
+	  replace_config_replacement="($replace_config_key . \"$replace_config_to\")"
+	  if ! grep -F "$replace_config_needle" "$replace_config_file" >/dev/null; then
+	    if [ "$replace_config_required" = required ]; then
+	      echo "config does not contain expected $replace_config_key value $replace_config_from: $replace_config_file" >&2
+	      exit 1
+	    fi
+	    return 0
+	  fi
+	  replace_config_needle=$(escape_config_sed_pattern "$replace_config_needle")
+	  replace_config_replacement=$(escape_config_sed_replacement "$replace_config_replacement")
+	  replace_config_tmp="$replace_config_file.package-racket-rewrite.$$"
+	  sed "s|$replace_config_needle|$replace_config_replacement|g" "$replace_config_file" > "$replace_config_tmp" || { rm -f "$replace_config_tmp"; exit 1; }
+	  mv "$replace_config_tmp" "$replace_config_file"
+	}
+	write_staged_config() {
+	  replace_config_file="$1"
+	  replace_config_stage_root="$2"
+	  replace_config_prefix="$3"
+	  replace_config_runtime_cache_root="$4"
+	  replace_config_staged_cache_root="$5"
+	  replace_config_value "$replace_config_file" compiled-file-system-cache-root "$replace_config_runtime_cache_root" "$replace_config_staged_cache_root" required
+	  replace_config_value "$replace_config_file" share-dir "$replace_config_prefix/share/racket" "$replace_config_stage_root$replace_config_prefix/share/racket" optional
+	  replace_config_value "$replace_config_file" pkgs-dir "$replace_config_prefix/share/racket/pkgs" "$replace_config_stage_root$replace_config_prefix/share/racket/pkgs" optional
+	  replace_config_value "$replace_config_file" doc-dir "$replace_config_prefix/share/doc/racket" "$replace_config_stage_root$replace_config_prefix/share/doc/racket" optional
+	  replace_config_value "$replace_config_file" lib-dir "$replace_config_prefix/lib/racket" "$replace_config_stage_root$replace_config_prefix/lib/racket" optional
+	  replace_config_value "$replace_config_file" include-dir "$replace_config_prefix/include/racket" "$replace_config_stage_root$replace_config_prefix/include/racket" optional
+	  replace_config_value "$replace_config_file" bin-dir "$replace_config_prefix/bin" "$replace_config_stage_root$replace_config_prefix/bin" optional
+	  replace_config_value "$replace_config_file" apps-dir "$replace_config_prefix/share/applications" "$replace_config_stage_root$replace_config_prefix/share/applications" optional
+	  replace_config_value "$replace_config_file" man-dir "$replace_config_prefix/share/man" "$replace_config_stage_root$replace_config_prefix/share/man" optional
+	}
+	write_staged_config "$config_file" "%{buildroot}" "%{package_prefix}" "$runtime_cache_root" "$staged_cache_root"
 mkdir -p "$staged_cache_root"
 if ! "$racket_bin" -X "$collects_dir" -G "$config_dir" -N raco -l- raco setup --system --no-user --reset-cache -D --no-pkg-deps; then
   cp "$backup" "$config_file"
