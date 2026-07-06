@@ -5,7 +5,7 @@
 Name: %{package_name}
 Version: 9.2.2
 %{!?package_system:%global package_system openeuler2403}
-%{!?package_release:%global package_release 4}
+%{!?package_release:%global package_release 5}
 Release: %{package_release}.%{package_system}
 Summary: Racket programming language
 License: MIT OR Apache-2.0
