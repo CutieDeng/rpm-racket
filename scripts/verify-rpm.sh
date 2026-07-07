@@ -101,7 +101,7 @@ if [ "$CACHE_MODE" = postinstall ]; then
     || die "RPM scriptlets do not build the system compiled cache"
   printf '%s\n' "$scripts" | grep -F 'raco setup --system --delete-cache' >/dev/null \
     || die "RPM scriptlets do not delete the system compiled cache"
-  printf '%s\n' "$scripts" | grep -F "rpm -q --quiet $CACHED_PACKAGE_NAME" >/dev/null \
+  printf '%s\n' "$scripts" | grep -F "rpm -q --quiet $CACHED_PACKAGE_NAME >/dev/null 2>&1" >/dev/null \
     || die "RPM preun does not guard cache deletion for package replacement"
   printf '%s\n' "$scripts" | grep -F 'package-racket-rhombus-cache' >/dev/null \
     || die "RPM scriptlets do not warm the Rhombus demod cache"
@@ -121,6 +121,6 @@ printf '%s\n' "$scripts" | grep -F 'rhombus-lib/rhombus/private/compiled/ephemer
   || die "RPM scriptlets do not purge the Rhombus demod cache directory"
 printf '%s\n' "$scripts" | grep -F "rmdir $DEFAULT_PREFIX/share/racket/pkgs/rhombus-lib/rhombus/private/compiled/ephemeral" >/dev/null \
   || die "RPM scriptlets do not remove empty Rhombus ephemeral cache parents"
-printf '%s\n' "$scripts" | grep -F 'rpm -q --quiet "$other_package"' >/dev/null \
+printf '%s\n' "$scripts" | grep -F 'rpm -q --quiet "$other_package" >/dev/null 2>&1' >/dev/null \
   || die "RPM postun does not guard shared cache deletion for package replacement"
 printf 'Validated RPM: %s\n' "$RPM_PATH"

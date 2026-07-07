@@ -201,7 +201,7 @@ rm -rf "$empty_home"
 
 %if "%{cache_mode}" == "postinstall"
 %preun
-if [ "$1" = "0" ] && ! rpm -q --quiet %{cached_package_name} && command -v raco >/dev/null 2>&1; then
+if [ "$1" = "0" ] && ! rpm -q --quiet %{cached_package_name} >/dev/null 2>&1 && command -v raco >/dev/null 2>&1; then
   raco setup --system --delete-cache || :
 fi
 %endif
@@ -212,7 +212,7 @@ other_package="%{base_package_name}"
 %else
 other_package="%{cached_package_name}"
 %endif
-if [ "$1" = "0" ] && ! rpm -q --quiet "$other_package"; then
+if [ "$1" = "0" ] && ! rpm -q --quiet "$other_package" >/dev/null 2>&1; then
   rm -rf /var/cache/racket/compiled
   rm -rf %{package_prefix}/share/racket/pkgs/rhombus-lib/rhombus/private/compiled/ephemeral/demod
   rmdir %{package_prefix}/share/racket/pkgs/rhombus-lib/rhombus/private/compiled/ephemeral %{package_prefix}/share/racket/pkgs/rhombus-lib/rhombus/private/compiled 2>/dev/null || :

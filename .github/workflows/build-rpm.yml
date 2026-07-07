@@ -30,7 +30,7 @@ jobs:
             container: 'quay.io/centos/centos:stream9'
             jobs: 2
             artifact_name: 'rpm-el9-x86_64-postinstall'
-            setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
+            setup_packages: 'bash diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'el9-x86_64-cached'
             rpm_system: 'el9'
             rpm_release: '6'
@@ -41,7 +41,7 @@ jobs:
             container: 'quay.io/centos/centos:stream9'
             jobs: 2
             artifact_name: 'rpm-el9-x86_64-cached'
-            setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
+            setup_packages: 'bash diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'fc40-x86_64-postinstall'
             rpm_system: 'fc40'
             rpm_release: '6'
