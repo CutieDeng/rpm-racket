@@ -91,6 +91,9 @@ else
   runtime_pkgs_cache="/var/cache/racket/compiled/${DEFAULT_PREFIX#/}/share/racket/pkgs"
   printf '%s\n' "$payload" | grep -F "$runtime_pkgs_cache/" | grep -E '[.]zo$' >/dev/null \
     || die "cached RPM payload does not include runtime-keyed package cache .zo files"
+  rhombus_ephemeral_cache="$DEFAULT_PREFIX/share/racket/pkgs/rhombus-lib/rhombus/private/compiled/ephemeral/demod"
+  printf '%s\n' "$payload" | grep -F "$rhombus_ephemeral_cache/" | grep -E '[.]zo$' >/dev/null \
+    || die "cached RPM payload does not include Rhombus demod cache .zo files"
 fi
 scripts=$(rpm -qp --scripts "$RPM_PATH")
 if [ "$CACHE_MODE" = postinstall ]; then
@@ -98,6 +101,10 @@ if [ "$CACHE_MODE" = postinstall ]; then
     || die "RPM scriptlets do not build the system compiled cache"
   printf '%s\n' "$scripts" | grep -F 'raco setup --system --delete-cache' >/dev/null \
     || die "RPM scriptlets do not delete the system compiled cache"
+  printf '%s\n' "$scripts" | grep -F "rpm -q --quiet $CACHED_PACKAGE_NAME" >/dev/null \
+    || die "RPM preun does not guard cache deletion for package replacement"
+  printf '%s\n' "$scripts" | grep -F 'package-racket-rhombus-cache' >/dev/null \
+    || die "RPM scriptlets do not warm the Rhombus demod cache"
 else
   if printf '%s\n' "$scripts" | grep -F 'raco setup --system --no-user --reset-cache -D --no-pkg-deps' >/dev/null; then
     die "cached RPM scriptlets unexpectedly build the system compiled cache"
@@ -108,4 +115,8 @@ else
 fi
 printf '%s\n' "$scripts" | grep -F 'rm -rf /var/cache/racket/compiled' >/dev/null \
   || die "RPM scriptlets do not purge the system compiled cache directory"
+printf '%s\n' "$scripts" | grep -F 'rhombus-lib/rhombus/private/compiled/ephemeral/demod' >/dev/null \
+  || die "RPM scriptlets do not purge the Rhombus demod cache directory"
+printf '%s\n' "$scripts" | grep -F 'rpm -q --quiet "$other_package"' >/dev/null \
+  || die "RPM postun does not guard shared cache deletion for package replacement"
 printf 'Validated RPM: %s\n' "$RPM_PATH"

@@ -5,7 +5,7 @@
 Name: %{package_name}
 Version: 9.2.2
 %{!?package_system:%global package_system openeuler2403}
-%{!?package_release:%global package_release 5}
+%{!?package_release:%global package_release 6}
 Release: %{package_release}.%{package_system}
 Summary: Racket programming language
 License: MIT OR Apache-2.0
@@ -113,6 +113,11 @@ add_runtime_link "$staged_cache_parent" "$runtime_cache_parent"
 if ! "$racket_bin" -X "$runtime_collects_dir" -G "$runtime_config_dir" -N raco -l- raco setup --system --no-user --reset-cache -D --no-pkg-deps --no-launcher; then
   exit 1
 fi
+if ! "$racket_bin" -X "$runtime_collects_dir" -G "$runtime_config_dir" -N rhombus -l- rhombus/run.rhm -e 'println("package-racket-rhombus-cache")' >/dev/null; then
+  exit 1
+fi
+rhombus_ephemeral_cache="%{buildroot}$runtime_share_dir/pkgs/rhombus-lib/rhombus/private/compiled/ephemeral/demod"
+find "$rhombus_ephemeral_cache" -path '*/compiled/*.zo' -type f -print -quit | grep -q . || { echo "staged Rhombus demod cache is empty: $rhombus_ephemeral_cache" >&2; exit 1; }
 cleanup_runtime_links
 trap - EXIT
 move_cache_tree() {
@@ -177,18 +182,30 @@ if [ -n "$setup_jobs" ]; then
 else
   raco setup --system --no-user --reset-cache -D --no-pkg-deps
 fi
+empty_home=$(mktemp -d)
+if ! HOME="$empty_home" rhombus -e 'println("package-racket-rhombus-cache")' >/dev/null; then
+  rm -rf "$empty_home"
+  exit 1
+fi
+rm -rf "$empty_home"
 %endif
 
 %if "%{cache_mode}" == "postinstall"
 %preun
-if [ "$1" = "0" ] && command -v raco >/dev/null 2>&1; then
+if [ "$1" = "0" ] && ! rpm -q --quiet %{cached_package_name} && command -v raco >/dev/null 2>&1; then
   raco setup --system --delete-cache || :
 fi
 %endif
 
 %postun
-if [ "$1" = "0" ]; then
+%if "%{cache_mode}" == "cached"
+other_package="%{base_package_name}"
+%else
+other_package="%{cached_package_name}"
+%endif
+if [ "$1" = "0" ] && ! rpm -q --quiet "$other_package"; then
   rm -rf /var/cache/racket/compiled
+  rm -rf %{package_prefix}/share/racket/pkgs/rhombus-lib/rhombus/private/compiled/ephemeral/demod
 fi
 
 %files -f %{name}.files
