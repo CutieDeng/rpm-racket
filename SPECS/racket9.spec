@@ -113,10 +113,10 @@ add_runtime_link "$staged_cache_parent" "$runtime_cache_parent"
 if ! "$racket_bin" -X "$runtime_collects_dir" -G "$runtime_config_dir" -N raco -l- raco setup --system --no-user --reset-cache -D --no-pkg-deps --no-launcher; then
   exit 1
 fi
-if ! "$racket_bin" -X "$runtime_collects_dir" -G "$runtime_config_dir" -N rhombus -l- rhombus/run.rhm --version >/dev/null; then
+if ! "$racket_bin" -U -R "$runtime_cache_root" -X "$runtime_collects_dir" -G "$runtime_config_dir" -N rhombus -l- rhombus/run.rhm --version >/dev/null; then
   exit 1
 fi
-if ! "$racket_bin" -X "$runtime_collects_dir" -G "$runtime_config_dir" -N rhombus -l- rhombus/run.rhm -e 'println("package-racket-rhombus-cache")' >/dev/null; then
+if ! "$racket_bin" -U -R "$runtime_cache_root" -X "$runtime_collects_dir" -G "$runtime_config_dir" -N rhombus -l- rhombus/run.rhm -e 'println("package-racket-rhombus-cache")' >/dev/null; then
   exit 1
 fi
 rhombus_ephemeral_cache="%{buildroot}$runtime_share_dir/pkgs/rhombus-lib/rhombus/private/compiled/ephemeral/demod"
@@ -185,12 +185,14 @@ if [ -n "$setup_jobs" ]; then
 else
   raco setup --system --no-user --reset-cache -D --no-pkg-deps
 fi
+compiled_cache_root="/var/cache/racket/compiled"
+mkdir -p "$compiled_cache_root"
 empty_home=$(mktemp -d)
-if ! HOME="$empty_home" rhombus --version >/dev/null; then
+if ! HOME="$empty_home" racket -U -R "$compiled_cache_root" -N rhombus -l- rhombus/run.rhm --version >/dev/null; then
   rm -rf "$empty_home"
   exit 1
 fi
-if ! HOME="$empty_home" rhombus -e 'println("package-racket-rhombus-cache")' >/dev/null; then
+if ! HOME="$empty_home" racket -U -R "$compiled_cache_root" -N rhombus -l- rhombus/run.rhm -e 'println("package-racket-rhombus-cache")' >/dev/null; then
   rm -rf "$empty_home"
   exit 1
 fi
@@ -213,6 +215,7 @@ other_package="%{cached_package_name}"
 if [ "$1" = "0" ] && ! rpm -q --quiet "$other_package"; then
   rm -rf /var/cache/racket/compiled
   rm -rf %{package_prefix}/share/racket/pkgs/rhombus-lib/rhombus/private/compiled/ephemeral/demod
+  rmdir %{package_prefix}/share/racket/pkgs/rhombus-lib/rhombus/private/compiled/ephemeral %{package_prefix}/share/racket/pkgs/rhombus-lib/rhombus/private/compiled 2>/dev/null || :
 fi
 
 %files -f %{name}.files
