@@ -108,6 +108,7 @@ if [ "${#RPMBUILD_ARGS[@]}" -gt 0 ]; then
   run_cmd "$DRY_RUN" rpmbuild -bb --target "$NORMALIZED_ARCH" \
     --define "_topdir $RPMBUILD_ROOT" \
     --define "_build_id_links none" \
+    --define "_sysconfdir /etc" \
     --define "package_prefix $PREFIX" \
     --define "package_name $RPM_PACKAGE_NAME" \
     --define "cache_mode $CACHE_MODE" \
@@ -120,6 +121,7 @@ else
   run_cmd "$DRY_RUN" rpmbuild -bb --target "$NORMALIZED_ARCH" \
     --define "_topdir $RPMBUILD_ROOT" \
     --define "_build_id_links none" \
+    --define "_sysconfdir /etc" \
     --define "package_prefix $PREFIX" \
     --define "package_name $RPM_PACKAGE_NAME" \
     --define "cache_mode $CACHE_MODE" \

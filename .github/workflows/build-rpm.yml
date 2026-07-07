@@ -30,7 +30,7 @@ jobs:
             container: 'quay.io/centos/centos:stream9'
             jobs: 2
             artifact_name: 'rpm-el9-x86_64-postinstall'
-            setup_packages: 'bash coreutils diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
+            setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'el9-x86_64-cached'
             rpm_system: 'el9'
             rpm_release: '6'
@@ -41,7 +41,7 @@ jobs:
             container: 'quay.io/centos/centos:stream9'
             jobs: 2
             artifact_name: 'rpm-el9-x86_64-cached'
-            setup_packages: 'bash coreutils diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
+            setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'fc40-x86_64-postinstall'
             rpm_system: 'fc40'
             rpm_release: '6'
@@ -230,6 +230,12 @@ jobs:
             echo 'dnf or yum is required in the build container'
             exit 1
           fi
+          if [ "${{ matrix.rpm_system }}" = "el9" ]; then
+            $pm -y install 'dnf-command(config-manager)' || $pm -y install dnf-plugins-core || true
+            if command -v dnf >/dev/null 2>&1; then
+              dnf config-manager --set-enabled crb || true
+            fi
+          fi
           $pm -y install $packages
 
       - name: Build RPM
@@ -270,7 +276,7 @@ jobs:
             exit 1
           fi
           $pm -y install "${rpm_files[0]}"
-          rpm -q libedit >/dev/null
+          rpm -qa | grep -Ei '^(libedit|libedit-devel|editline)' || true
           cache_count=$(find /var/cache/racket/compiled -path '*/compiled/*.zo' 2>/dev/null | wc -l)
           [ "$cache_count" -gt 0 ] || { echo 'system compiled cache is empty after RPM install'; exit 1; }
           runtime_collects_cache="/var/cache/racket/compiled/usr/share/racket/collects"

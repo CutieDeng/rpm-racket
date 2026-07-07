@@ -98,6 +98,7 @@ prepare_source_archive "$DRY_RUN" "$SOURCE_ARCHIVE" "$SOURCE_URL" "$SOURCE_PATH"
 if [ "${#RPMBUILD_ARGS[@]}" -gt 0 ]; then
   run_cmd "$DRY_RUN" rpmbuild -bs --target "$NORMALIZED_ARCH" \
     --define "_topdir $RPMBUILD_ROOT" \
+    --define "_sysconfdir /etc" \
     --define "package_prefix $PREFIX" \
     --define "package_system $RPM_SYSTEM" \
     --define "package_release $RPM_RELEASE" \
@@ -107,6 +108,7 @@ if [ "${#RPMBUILD_ARGS[@]}" -gt 0 ]; then
 else
   run_cmd "$DRY_RUN" rpmbuild -bs --target "$NORMALIZED_ARCH" \
     --define "_topdir $RPMBUILD_ROOT" \
+    --define "_sysconfdir /etc" \
     --define "package_prefix $PREFIX" \
     --define "package_system $RPM_SYSTEM" \
     --define "package_release $RPM_RELEASE" \

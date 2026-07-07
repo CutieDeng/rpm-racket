@@ -113,6 +113,9 @@ add_runtime_link "$staged_cache_parent" "$runtime_cache_parent"
 if ! "$racket_bin" -X "$runtime_collects_dir" -G "$runtime_config_dir" -N raco -l- raco setup --system --no-user --reset-cache -D --no-pkg-deps --no-launcher; then
   exit 1
 fi
+if ! "$racket_bin" -X "$runtime_collects_dir" -G "$runtime_config_dir" -N rhombus -l- rhombus/run.rhm --version >/dev/null; then
+  exit 1
+fi
 if ! "$racket_bin" -X "$runtime_collects_dir" -G "$runtime_config_dir" -N rhombus -l- rhombus/run.rhm -e 'println("package-racket-rhombus-cache")' >/dev/null; then
   exit 1
 fi
@@ -183,6 +186,10 @@ else
   raco setup --system --no-user --reset-cache -D --no-pkg-deps
 fi
 empty_home=$(mktemp -d)
+if ! HOME="$empty_home" rhombus --version >/dev/null; then
+  rm -rf "$empty_home"
+  exit 1
+fi
 if ! HOME="$empty_home" rhombus -e 'println("package-racket-rhombus-cache")' >/dev/null; then
   rm -rf "$empty_home"
   exit 1
