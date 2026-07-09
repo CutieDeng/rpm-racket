@@ -9,7 +9,7 @@ source "$SCRIPT_DIR/rpm-common.sh"
 
 usage() {
   cat <<'USAGE'
-Usage: scripts/verify-rpm.sh --rpm PATH --rpm-system SYSTEM --rpm-release RELEASE --rpm-arch ARCH [--cache-mode MODE] [--dry-run]
+Usage: scripts/verify-rpm.sh --rpm PATH --rpm-system SYSTEM --rpm-release RELEASE --rpm-arch ARCH [--cache-mode MODE] [--prefix PATH] [--dry-run]
 
 Validate RPM metadata and payload ownership boundaries.
 USAGE
@@ -21,6 +21,7 @@ RPM_SYSTEM=
 RPM_RELEASE=
 RPM_ARCH=
 CACHE_MODE="$DEFAULT_CACHE_MODE"
+PREFIX="$DEFAULT_PREFIX"
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -29,6 +30,7 @@ while [ $# -gt 0 ]; do
     --rpm-release) [ $# -ge 2 ] || usage_error "missing value for --rpm-release"; RPM_RELEASE="$2"; shift 2 ;;
     --rpm-arch) [ $# -ge 2 ] || usage_error "missing value for --rpm-arch"; RPM_ARCH="$2"; shift 2 ;;
     --cache-mode) [ $# -ge 2 ] || usage_error "missing value for --cache-mode"; CACHE_MODE="$2"; shift 2 ;;
+    --prefix) [ $# -ge 2 ] || usage_error "missing value for --prefix"; PREFIX="$2"; shift 2 ;;
     --dry-run) DRY_RUN=1; shift ;;
     --help) usage; exit 0 ;;
     *) usage_error "unknown option: $1" ;;
@@ -44,9 +46,10 @@ require_repo_root "$REPO_ROOT"
 validate_rpm_system "$RPM_SYSTEM"
 validate_rpm_release "$RPM_RELEASE"
 validate_cache_mode "$CACHE_MODE"
+require_absolute_path "$PREFIX" "prefix"
 NORMALIZED_ARCH=$(normalize_arch "$RPM_ARCH")
 RPM_PACKAGE_NAME=$(package_name_for_cache_mode "$CACHE_MODE")
-RPM_FULL_RELEASE=$(rpm_full_release "$RPM_RELEASE" "$RPM_SYSTEM")
+RPM_FULL_RELEASE=$(rpm_full_release "$RPM_RELEASE" "$RPM_SYSTEM" "$CACHE_MODE")
 EXPECTED_RPM=$(rpm_name_for_arch "$NORMALIZED_ARCH" "$RPM_RELEASE" "$RPM_SYSTEM" "$CACHE_MODE")
 
 if [ "$DRY_RUN" = 1 ]; then
@@ -55,6 +58,7 @@ if [ "$DRY_RUN" = 1 ]; then
   printf 'Would expect RPM release: %s\n' "$RPM_RELEASE"
   printf 'Would expect RPM full release: %s\n' "$RPM_FULL_RELEASE"
   printf 'Would expect RPM cache mode: %s\n' "$CACHE_MODE"
+  printf 'Would expect RPM prefix: %s\n' "$PREFIX"
   printf 'Would expect RPM package name: %s\n' "$RPM_PACKAGE_NAME"
   printf 'Would expect RPM basename: %s\n' "$EXPECTED_RPM"
   exit 0
@@ -72,55 +76,51 @@ printf '%s\n' "$metadata" | grep -F "Release     : $RPM_FULL_RELEASE" >/dev/null
 printf '%s\n' "$metadata" | grep -F "Architecture: $NORMALIZED_ARCH" >/dev/null || die "RPM metadata missing expected architecture"
 
 payload=$(rpm -qpl "$RPM_PATH")
-if printf '%s\n' "$payload" | grep -Fx '/var/cache/racket/racket-compiled-cache.log' >/dev/null; then
+if printf '%s\n' "$payload" | grep -E '/racket-compiled-cache[.]log$' >/dev/null; then
   die "RPM payload unexpectedly includes racket compiled cache debug log"
 fi
 if printf '%s\n' "$payload" | grep -Eq '^/usr$|^/usr/(bin|lib|lib64|share)$'; then
   die "RPM payload claims shared /usr parent directory"
 fi
+immutable_cache_root="$PREFIX/lib/racket/$PACKAGE_VERSION/compiled-cache"
 if [ "$CACHE_MODE" = postinstall ]; then
-  if printf '%s\n' "$payload" | grep -E '^/var/cache/racket/compiled/.+[.]zo$' >/dev/null; then
-    die "postinstall RPM payload unexpectedly includes system compiled cache .zo files"
+  if printf '%s\n' "$payload" | grep -F "$immutable_cache_root/" | grep -E '[.]zo$' >/dev/null; then
+    die "postinstall RPM payload unexpectedly includes immutable compiled cache .zo files"
   fi
 else
-  printf '%s\n' "$payload" | grep -E '^/var/cache/racket/compiled/.+[.]zo$' >/dev/null \
-    || die "cached RPM payload does not include system compiled cache .zo files"
-  runtime_collects_cache="/var/cache/racket/compiled/${DEFAULT_PREFIX#/}/share/racket/collects"
+  printf '%s\n' "$payload" | grep -F "$immutable_cache_root/" | grep -E '[.]zo$' >/dev/null \
+    || die "cached RPM payload does not include immutable compiled cache .zo files"
+  runtime_collects_cache="$immutable_cache_root/${PREFIX#/}/share/racket/collects"
   printf '%s\n' "$payload" | grep -F "$runtime_collects_cache/" | grep -E '[.]zo$' >/dev/null \
     || die "cached RPM payload does not include runtime-keyed collects cache .zo files"
-  runtime_pkgs_cache="/var/cache/racket/compiled/${DEFAULT_PREFIX#/}/share/racket/pkgs"
+  runtime_pkgs_cache="$immutable_cache_root/${PREFIX#/}/share/racket/pkgs"
   printf '%s\n' "$payload" | grep -F "$runtime_pkgs_cache/" | grep -E '[.]zo$' >/dev/null \
     || die "cached RPM payload does not include runtime-keyed package cache .zo files"
-  rhombus_ephemeral_cache="$DEFAULT_PREFIX/share/racket/pkgs/rhombus-lib/rhombus/private/compiled/ephemeral/demod"
-  printf '%s\n' "$payload" | grep -F "$rhombus_ephemeral_cache/" | grep -E '[.]zo$' >/dev/null \
-    || die "cached RPM payload does not include Rhombus demod cache .zo files"
 fi
+if printf '%s\n' "$payload" | grep -F '/compiled/ephemeral/' >/dev/null; then
+  die "RPM payload unexpectedly includes Rhombus ephemeral cache"
+fi
+provides=$(rpm -qp --provides "$RPM_PATH")
+printf '%s\n' "$provides" | grep -F "$BASE_PACKAGE_NAME(cache-mode-$CACHE_MODE)" >/dev/null \
+  || die "RPM metadata is missing cache-mode capability"
 scripts=$(rpm -qp --scripts "$RPM_PATH")
 if [ "$CACHE_MODE" = postinstall ]; then
-  printf '%s\n' "$scripts" | grep -F 'raco setup --system --no-user --reset-cache -D --no-pkg-deps' >/dev/null \
+  printf '%s\n' "$scripts" | grep -F "$PREFIX/bin/raco setup" | grep -F -- '--reset-cache --unsafe-delete-all' >/dev/null \
     || die "RPM scriptlets do not build the system compiled cache"
-  printf '%s\n' "$scripts" | grep -F 'raco setup --system --delete-cache' >/dev/null \
-    || die "RPM scriptlets do not delete the system compiled cache"
-  printf '%s\n' "$scripts" | grep -F "rpm -q --quiet $CACHED_PACKAGE_NAME >/dev/null 2>&1" >/dev/null \
-    || die "RPM preun does not guard cache deletion for package replacement"
   printf '%s\n' "$scripts" | grep -F 'package-racket-rhombus-cache' >/dev/null \
-    || die "RPM scriptlets do not warm the Rhombus demod cache"
-  printf '%s\n' "$scripts" | grep -F 'racket -U -R "$compiled_cache_root" -N rhombus -l- rhombus/run.rhm --version' >/dev/null \
-    || die "RPM scriptlets do not warm the Rhombus version cache into the system cache"
+    || die "RPM scriptlets do not warm Rhombus into the dynamic cache"
 else
-  if printf '%s\n' "$scripts" | grep -F 'raco setup --system --no-user --reset-cache -D --no-pkg-deps' >/dev/null; then
+  if printf '%s\n' "$scripts" | grep -F '/bin/raco setup' >/dev/null; then
     die "cached RPM scriptlets unexpectedly build the system compiled cache"
   fi
-  if printf '%s\n' "$scripts" | grep -F 'raco setup --system --delete-cache' >/dev/null; then
-    die "cached RPM scriptlets unexpectedly delete the system compiled cache through raco"
-  fi
 fi
+printf '%s\n' "$scripts" | grep -F "rm -rf \"/var/cache/racket/$PACKAGE_VERSION/compiled\"" >/dev/null \
+  || die "RPM scriptlets do not purge the versioned dynamic cache directory"
+printf '%s\n' "$scripts" | grep -F "rm -f \"/var/cache/racket/$PACKAGE_VERSION/racket-compiled-cache.log\"" >/dev/null \
+  || die "RPM scriptlets do not purge the compiled cache debug log"
 printf '%s\n' "$scripts" | grep -F 'rm -rf /var/cache/racket/compiled' >/dev/null \
-  || die "RPM scriptlets do not purge the system compiled cache directory"
-printf '%s\n' "$scripts" | grep -F 'rhombus-lib/rhombus/private/compiled/ephemeral/demod' >/dev/null \
-  || die "RPM scriptlets do not purge the Rhombus demod cache directory"
-printf '%s\n' "$scripts" | grep -F "rmdir $DEFAULT_PREFIX/share/racket/pkgs/rhombus-lib/rhombus/private/compiled/ephemeral" >/dev/null \
-  || die "RPM scriptlets do not remove empty Rhombus ephemeral cache parents"
-printf '%s\n' "$scripts" | grep -F 'rpm -q --quiet "$other_package" >/dev/null 2>&1' >/dev/null \
-  || die "RPM postun does not guard shared cache deletion for package replacement"
+  || die "RPM scriptlets do not purge the legacy unversioned cache"
+if printf '%s\n' "$scripts" | grep -E 'rpm -q|racket9-cached|other_package=' >/dev/null; then
+  die "RPM scriptlets retain obsolete cross-package lifecycle checks"
+fi
 printf 'Validated RPM: %s\n' "$RPM_PATH"

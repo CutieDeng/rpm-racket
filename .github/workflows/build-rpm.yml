@@ -13,6 +13,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: rpm-build-and-release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build-rpm:
     name: build ${{ matrix.rpm_system }} ${{ matrix.rpm_arch }} ${{ matrix.cache_mode }}
@@ -20,9 +24,20 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - id: 'el9-x86_64-cached'
+            rpm_system: 'el9'
+            rpm_release: '7'
+            rpm_arch: 'x86_64'
+            cache_mode: 'cached'
+            package_name: 'racket9'
+            runner: 'ubuntu-24.04'
+            container: 'quay.io/centos/centos:stream9'
+            jobs: 2
+            artifact_name: 'rpm-el9-x86_64-cached'
+            setup_packages: 'bash diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'el9-x86_64-postinstall'
             rpm_system: 'el9'
-            rpm_release: '6'
+            rpm_release: '7'
             rpm_arch: 'x86_64'
             cache_mode: 'postinstall'
             package_name: 'racket9'
@@ -31,20 +46,20 @@ jobs:
             jobs: 2
             artifact_name: 'rpm-el9-x86_64-postinstall'
             setup_packages: 'bash diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
-          - id: 'el9-x86_64-cached'
-            rpm_system: 'el9'
-            rpm_release: '6'
+          - id: 'fc40-x86_64-cached'
+            rpm_system: 'fc40'
+            rpm_release: '7'
             rpm_arch: 'x86_64'
             cache_mode: 'cached'
-            package_name: 'racket9-cached'
+            package_name: 'racket9'
             runner: 'ubuntu-24.04'
-            container: 'quay.io/centos/centos:stream9'
+            container: 'fedora:40'
             jobs: 2
-            artifact_name: 'rpm-el9-x86_64-cached'
-            setup_packages: 'bash diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
+            artifact_name: 'rpm-fc40-x86_64-cached'
+            setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'fc40-x86_64-postinstall'
             rpm_system: 'fc40'
-            rpm_release: '6'
+            rpm_release: '7'
             rpm_arch: 'x86_64'
             cache_mode: 'postinstall'
             package_name: 'racket9'
@@ -53,20 +68,20 @@ jobs:
             jobs: 2
             artifact_name: 'rpm-fc40-x86_64-postinstall'
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
-          - id: 'fc40-x86_64-cached'
-            rpm_system: 'fc40'
-            rpm_release: '6'
+          - id: 'fc43-x86_64-cached'
+            rpm_system: 'fc43'
+            rpm_release: '7'
             rpm_arch: 'x86_64'
             cache_mode: 'cached'
-            package_name: 'racket9-cached'
+            package_name: 'racket9'
             runner: 'ubuntu-24.04'
-            container: 'fedora:40'
+            container: 'fedora:43'
             jobs: 2
-            artifact_name: 'rpm-fc40-x86_64-cached'
+            artifact_name: 'rpm-fc43-x86_64-cached'
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'fc43-x86_64-postinstall'
             rpm_system: 'fc43'
-            rpm_release: '6'
+            rpm_release: '7'
             rpm_arch: 'x86_64'
             cache_mode: 'postinstall'
             package_name: 'racket9'
@@ -75,20 +90,20 @@ jobs:
             jobs: 2
             artifact_name: 'rpm-fc43-x86_64-postinstall'
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
-          - id: 'fc43-x86_64-cached'
-            rpm_system: 'fc43'
-            rpm_release: '6'
+          - id: 'fc44-x86_64-cached'
+            rpm_system: 'fc44'
+            rpm_release: '7'
             rpm_arch: 'x86_64'
             cache_mode: 'cached'
-            package_name: 'racket9-cached'
+            package_name: 'racket9'
             runner: 'ubuntu-24.04'
-            container: 'fedora:43'
+            container: 'fedora:44'
             jobs: 2
-            artifact_name: 'rpm-fc43-x86_64-cached'
+            artifact_name: 'rpm-fc44-x86_64-cached'
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'fc44-x86_64-postinstall'
             rpm_system: 'fc44'
-            rpm_release: '6'
+            rpm_release: '7'
             rpm_arch: 'x86_64'
             cache_mode: 'postinstall'
             package_name: 'racket9'
@@ -97,20 +112,20 @@ jobs:
             jobs: 2
             artifact_name: 'rpm-fc44-x86_64-postinstall'
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
-          - id: 'fc44-x86_64-cached'
-            rpm_system: 'fc44'
-            rpm_release: '6'
-            rpm_arch: 'x86_64'
+          - id: 'openeuler2203-aarch64-cached'
+            rpm_system: 'openeuler2203'
+            rpm_release: '7'
+            rpm_arch: 'aarch64'
             cache_mode: 'cached'
-            package_name: 'racket9-cached'
-            runner: 'ubuntu-24.04'
-            container: 'fedora:44'
+            package_name: 'racket9'
+            runner: 'ubuntu-24.04-arm'
+            container: 'openeuler/openeuler:22.03-lts'
             jobs: 2
-            artifact_name: 'rpm-fc44-x86_64-cached'
+            artifact_name: 'rpm-openeuler2203-aarch64-cached'
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'openeuler2203-aarch64-postinstall'
             rpm_system: 'openeuler2203'
-            rpm_release: '6'
+            rpm_release: '7'
             rpm_arch: 'aarch64'
             cache_mode: 'postinstall'
             package_name: 'racket9'
@@ -119,20 +134,20 @@ jobs:
             jobs: 2
             artifact_name: 'rpm-openeuler2203-aarch64-postinstall'
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
-          - id: 'openeuler2203-aarch64-cached'
+          - id: 'openeuler2203-x86_64-cached'
             rpm_system: 'openeuler2203'
-            rpm_release: '6'
-            rpm_arch: 'aarch64'
+            rpm_release: '7'
+            rpm_arch: 'x86_64'
             cache_mode: 'cached'
-            package_name: 'racket9-cached'
-            runner: 'ubuntu-24.04-arm'
+            package_name: 'racket9'
+            runner: 'ubuntu-24.04'
             container: 'openeuler/openeuler:22.03-lts'
             jobs: 2
-            artifact_name: 'rpm-openeuler2203-aarch64-cached'
+            artifact_name: 'rpm-openeuler2203-x86_64-cached'
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'openeuler2203-x86_64-postinstall'
             rpm_system: 'openeuler2203'
-            rpm_release: '6'
+            rpm_release: '7'
             rpm_arch: 'x86_64'
             cache_mode: 'postinstall'
             package_name: 'racket9'
@@ -141,20 +156,20 @@ jobs:
             jobs: 2
             artifact_name: 'rpm-openeuler2203-x86_64-postinstall'
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
-          - id: 'openeuler2203-x86_64-cached'
-            rpm_system: 'openeuler2203'
-            rpm_release: '6'
-            rpm_arch: 'x86_64'
+          - id: 'openeuler2403-aarch64-cached'
+            rpm_system: 'openeuler2403'
+            rpm_release: '7'
+            rpm_arch: 'aarch64'
             cache_mode: 'cached'
-            package_name: 'racket9-cached'
-            runner: 'ubuntu-24.04'
-            container: 'openeuler/openeuler:22.03-lts'
+            package_name: 'racket9'
+            runner: 'ubuntu-24.04-arm'
+            container: 'openeuler/openeuler:24.03-lts'
             jobs: 2
-            artifact_name: 'rpm-openeuler2203-x86_64-cached'
+            artifact_name: 'rpm-openeuler2403-aarch64-cached'
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'openeuler2403-aarch64-postinstall'
             rpm_system: 'openeuler2403'
-            rpm_release: '6'
+            rpm_release: '7'
             rpm_arch: 'aarch64'
             cache_mode: 'postinstall'
             package_name: 'racket9'
@@ -163,20 +178,20 @@ jobs:
             jobs: 2
             artifact_name: 'rpm-openeuler2403-aarch64-postinstall'
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
-          - id: 'openeuler2403-aarch64-cached'
+          - id: 'openeuler2403-x86_64-cached'
             rpm_system: 'openeuler2403'
-            rpm_release: '6'
-            rpm_arch: 'aarch64'
+            rpm_release: '7'
+            rpm_arch: 'x86_64'
             cache_mode: 'cached'
-            package_name: 'racket9-cached'
-            runner: 'ubuntu-24.04-arm'
+            package_name: 'racket9'
+            runner: 'ubuntu-24.04'
             container: 'openeuler/openeuler:24.03-lts'
             jobs: 2
-            artifact_name: 'rpm-openeuler2403-aarch64-cached'
+            artifact_name: 'rpm-openeuler2403-x86_64-cached'
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'openeuler2403-x86_64-postinstall'
             rpm_system: 'openeuler2403'
-            rpm_release: '6'
+            rpm_release: '7'
             rpm_arch: 'x86_64'
             cache_mode: 'postinstall'
             package_name: 'racket9'
@@ -184,17 +199,6 @@ jobs:
             container: 'openeuler/openeuler:24.03-lts'
             jobs: 2
             artifact_name: 'rpm-openeuler2403-x86_64-postinstall'
-            setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
-          - id: 'openeuler2403-x86_64-cached'
-            rpm_system: 'openeuler2403'
-            rpm_release: '6'
-            rpm_arch: 'x86_64'
-            cache_mode: 'cached'
-            package_name: 'racket9-cached'
-            runner: 'ubuntu-24.04'
-            container: 'openeuler/openeuler:24.03-lts'
-            jobs: 2
-            artifact_name: 'rpm-openeuler2403-x86_64-cached'
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
     runs-on: ${{ matrix.runner }}
     container:
@@ -210,10 +214,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -f SPECS/racket9.spec
+          test -f SPECS/racket9-cached.spec
+          test -f SPECS/racket9-postinstall.spec
           test -x scripts/build-rpm.sh
           test -x scripts/verify-rpm.sh
-          test ! -e racket9.repo
+          repo_file='racket9-${{ matrix.rpm_system }}.repo'
+          test -f "$repo_file"
+          grep -F '[cutiedeng-racket-${{ matrix.rpm_system }}-cached]' "$repo_file"
+          grep -F '[cutiedeng-racket-${{ matrix.rpm_system }}-postinstall]' "$repo_file"
           test ! -d repo
 
       - name: Install RPM build dependencies
@@ -254,11 +262,36 @@ jobs:
             --prefix '/usr' \
             --jobs "${{ matrix.jobs }}"
 
+      - name: Rebuild concrete SRPM
+        if: ${{ matrix.id == 'el9-x86_64-cached' || matrix.id == 'el9-x86_64-postinstall' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          srpm=$(find "$GITHUB_WORKSPACE/.build/${{ matrix.id }}/rpmbuild/SRPMS" -maxdepth 1 -name '*.src.rpm' -type f -print -quit)
+          [ -n "$srpm" ] || { echo 'matching SRPM was not produced by rpmbuild -ba'; exit 1; }
+          rebuild_root="$GITHUB_WORKSPACE/.build/${{ matrix.id }}/srpm-rebuild"
+          mkdir -p "$rebuild_root/BUILD" "$rebuild_root/BUILDROOT" "$rebuild_root/RPMS" "$rebuild_root/SOURCES" "$rebuild_root/SPECS" "$rebuild_root/SRPMS"
+          rpmbuild --rebuild --target "${{ matrix.rpm_arch }}" \
+            --define "_topdir $rebuild_root" \
+            --define "_build_id_links none" \
+            --define "_sysconfdir /etc" \
+            --define "_smp_mflags -j${{ matrix.jobs }}" \
+            "$srpm"
+          rebuilt_rpm=$(find "$rebuild_root/RPMS" -name '*.rpm' ! -name '*.src.rpm' -type f -print -quit)
+          [ -n "$rebuilt_rpm" ] || { echo 'SRPM rebuild did not produce a binary RPM'; exit 1; }
+          scripts/verify-rpm.sh \
+            --rpm "$rebuilt_rpm" \
+            --rpm-system "${{ matrix.rpm_system }}" \
+            --rpm-release "${{ matrix.rpm_release }}" \
+            --rpm-arch "${{ matrix.rpm_arch }}" \
+            --cache-mode "${{ matrix.cache_mode }}"
+
       - name: Install and uninstall smoke test
         shell: bash
         env:
           PACKAGE_NAME: ${{ matrix.package_name }}
           PACKAGE_VERSION: '9.2.2'
+          CACHE_MODE: ${{ matrix.cache_mode }}
         run: |
           set -euo pipefail
           mapfile -t rpm_files < <(find "$GITHUB_WORKSPACE/artifacts" -maxdepth 1 -name '*.rpm' ! -name '*.src.rpm' -type f | sort)
@@ -277,17 +310,28 @@ jobs:
           fi
           $pm -y install "${rpm_files[0]}"
           rpm -qa | grep -Ei '^(libedit|libedit-devel|editline)' || true
-          cache_count=$(find /var/cache/racket/compiled -path '*/compiled/*.zo' 2>/dev/null | wc -l)
-          [ "$cache_count" -gt 0 ] || { echo 'system compiled cache is empty after RPM install'; exit 1; }
-          runtime_collects_cache="/var/cache/racket/compiled/usr/share/racket/collects"
-          runtime_pkgs_cache="/var/cache/racket/compiled/usr/share/racket/pkgs"
-          rhombus_ephemeral_cache="/usr/share/racket/pkgs/rhombus-lib/rhombus/private/compiled/ephemeral/demod"
+          immutable_cache_root="/usr/lib/racket/$PACKAGE_VERSION/compiled-cache"
+          dynamic_cache_root="/var/cache/racket/$PACKAGE_VERSION/compiled"
+          if [ "$CACHE_MODE" = cached ]; then
+            cache_root="$immutable_cache_root"
+            [ ! -e "$dynamic_cache_root" ] || { echo "cached install left a stale dynamic cache: $dynamic_cache_root"; exit 1; }
+          else
+            cache_root="$dynamic_cache_root"
+            if find "$immutable_cache_root" -path '*/compiled/*.zo' -type f -print -quit 2>/dev/null | grep -q .; then
+              echo "postinstall payload unexpectedly contains immutable cache files: $immutable_cache_root"
+              exit 1
+            fi
+          fi
+          cache_count=$(find "$cache_root" -path '*/compiled/*.zo' 2>/dev/null | wc -l)
+          [ "$cache_count" -gt 0 ] || { echo "selected compiled cache is empty after RPM install: $cache_root"; exit 1; }
+          runtime_collects_cache="$cache_root/usr/share/racket/collects"
+          runtime_pkgs_cache="$cache_root/usr/share/racket/pkgs"
+          rhombus_ephemeral_root="/usr/share/racket/pkgs/rhombus-lib/rhombus/private/compiled/ephemeral"
           find "$runtime_collects_cache" -path '*/compiled/*.zo' -type f -print -quit | grep -q . \
             || { echo "runtime-keyed collects cache is empty after RPM install: $runtime_collects_cache"; exit 1; }
           find "$runtime_pkgs_cache" -path '*/compiled/*.zo' -type f -print -quit | grep -q . \
             || { echo "runtime-keyed package cache is empty after RPM install: $runtime_pkgs_cache"; exit 1; }
-          find "$rhombus_ephemeral_cache" -path '*/compiled/*.zo' -type f -print -quit | grep -q . \
-            || { echo "Rhombus demod cache is empty after RPM install: $rhombus_ephemeral_cache"; exit 1; }
+          [ ! -e "$rhombus_ephemeral_root" ] || { echo "Rhombus ephemeral cache was installed: $rhombus_ephemeral_root"; exit 1; }
           racket -e '(displayln (version))' | grep -F "$PACKAGE_VERSION"
           racket -e '(displayln f"rpm-ci-ok")' | grep -F 'rpm-ci-ok'
           racket -e '(require readline/readline) (displayln f"rpm-readline-ok")' | grep -F 'rpm-readline-ok'
@@ -300,12 +344,14 @@ jobs:
           HOME="$empty_home" timeout 30s rhombus -e 'println("rpm-rhombus-fresh-home-ok")' | grep -F 'rpm-rhombus-fresh-home-ok'
           rm -rf "$empty_home"
           raco pkg show --all >/tmp/raco-pkgs.txt
+          rpm -V "$PACKAGE_NAME"
           rpm -e "$PACKAGE_NAME"
           if rpm -q "$PACKAGE_NAME" >/dev/null 2>&1; then
             echo "Package still installed after rpm -e: $PACKAGE_NAME"
             exit 1
           fi
-          [ ! -d /var/cache/racket/compiled ] || { echo 'system compiled cache remains after RPM erase'; exit 1; }
+          [ ! -d "$dynamic_cache_root" ] || { echo 'dynamic compiled cache remains after RPM erase'; exit 1; }
+          [ ! -d "$immutable_cache_root" ] || { echo 'immutable compiled cache remains after RPM erase'; exit 1; }
 
       - name: Upload RPM artifact
         uses: actions/upload-artifact@v6
@@ -314,13 +360,176 @@ jobs:
           path: artifacts/*.rpm
           if-no-files-found: error
 
-  publish-rpm:
+  test-rpm-transactions:
+    name: transactions ${{ matrix.rpm_system }} ${{ matrix.rpm_arch }}
     needs: build-rpm
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - id: 'el9-x86_64'
+            rpm_system: 'el9'
+            rpm_release: '7'
+            rpm_arch: 'x86_64'
+            runner: 'ubuntu-24.04'
+            container: 'quay.io/centos/centos:stream9'
+          - id: 'fc40-x86_64'
+            rpm_system: 'fc40'
+            rpm_release: '7'
+            rpm_arch: 'x86_64'
+            runner: 'ubuntu-24.04'
+            container: 'fedora:40'
+          - id: 'fc43-x86_64'
+            rpm_system: 'fc43'
+            rpm_release: '7'
+            rpm_arch: 'x86_64'
+            runner: 'ubuntu-24.04'
+            container: 'fedora:43'
+          - id: 'fc44-x86_64'
+            rpm_system: 'fc44'
+            rpm_release: '7'
+            rpm_arch: 'x86_64'
+            runner: 'ubuntu-24.04'
+            container: 'fedora:44'
+          - id: 'openeuler2203-aarch64'
+            rpm_system: 'openeuler2203'
+            rpm_release: '7'
+            rpm_arch: 'aarch64'
+            runner: 'ubuntu-24.04-arm'
+            container: 'openeuler/openeuler:22.03-lts'
+          - id: 'openeuler2203-x86_64'
+            rpm_system: 'openeuler2203'
+            rpm_release: '7'
+            rpm_arch: 'x86_64'
+            runner: 'ubuntu-24.04'
+            container: 'openeuler/openeuler:22.03-lts'
+          - id: 'openeuler2403-aarch64'
+            rpm_system: 'openeuler2403'
+            rpm_release: '7'
+            rpm_arch: 'aarch64'
+            runner: 'ubuntu-24.04-arm'
+            container: 'openeuler/openeuler:24.03-lts'
+          - id: 'openeuler2403-x86_64'
+            rpm_system: 'openeuler2403'
+            rpm_release: '7'
+            rpm_arch: 'x86_64'
+            runner: 'ubuntu-24.04'
+            container: 'openeuler/openeuler:24.03-lts'
+    runs-on: ${{ matrix.runner }}
+    container:
+      image: ${{ matrix.container }}
+      options: --user root
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - name: Download both cache modes
+        uses: actions/download-artifact@v6
+        with:
+          pattern: 'rpm-${{ matrix.id }}-*'
+          path: transaction-assets
+          merge-multiple: true
+
+      - name: Verify install upgrade downgrade reinstall and erase
+        shell: bash
+        env:
+          PACKAGE_NAME: 'racket9'
+          PACKAGE_VERSION: '9.2.2'
+          RPM_SYSTEM: ${{ matrix.rpm_system }}
+          RPM_RELEASE: ${{ matrix.rpm_release }}
+          RPM_ARCH: ${{ matrix.rpm_arch }}
+        run: |
+          set -euo pipefail
+          postinstall_rpm=$(find "$GITHUB_WORKSPACE/transaction-assets" -type f -name "*-$RPM_RELEASE.1.postinstall.$RPM_SYSTEM.$RPM_ARCH.rpm" -print -quit)
+          cached_rpm=$(find "$GITHUB_WORKSPACE/transaction-assets" -type f -name "*-$RPM_RELEASE.2.cached.$RPM_SYSTEM.$RPM_ARCH.rpm" -print -quit)
+          [ -n "$postinstall_rpm" ] || { echo 'postinstall RPM not found'; exit 1; }
+          [ -n "$cached_rpm" ] || { echo 'cached RPM not found'; exit 1; }
+          if command -v dnf >/dev/null 2>&1; then
+            pm=dnf
+          elif command -v yum >/dev/null 2>&1; then
+            pm=yum
+          else
+            echo 'dnf or yum is required for RPM transaction tests'
+            exit 1
+          fi
+          $pm -y install createrepo_c rpm-build
+          transaction_repo="$GITHUB_WORKSPACE/transaction-repo"
+          mkdir -p "$transaction_repo/cached" "$transaction_repo/postinstall"
+          cp "$cached_rpm" "$transaction_repo/cached/"
+          cp "$postinstall_rpm" "$transaction_repo/postinstall/"
+          createrepo_c "$transaction_repo/cached"
+          createrepo_c "$transaction_repo/postinstall"
+          printf '%s\n'             '[racket-transaction-cached]'             'name=Racket transaction cached'             "baseurl=file://$transaction_repo/cached"             'enabled=0'             'gpgcheck=0'             ''             '[racket-transaction-postinstall]'             'name=Racket transaction postinstall'             "baseurl=file://$transaction_repo/postinstall"             'enabled=0'             'gpgcheck=0'             > /etc/yum.repos.d/racket-transaction.repo
+          dynamic_cache_root="/var/cache/racket/$PACKAGE_VERSION/compiled"
+          immutable_cache_root="/usr/lib/racket/$PACKAGE_VERSION/compiled-cache"
+          assert_release() {
+            expected="$1"
+            actual=$(rpm -q --qf '%{RELEASE}' "$PACKAGE_NAME")
+            [ "$actual" = "$expected" ] || { echo "expected release $expected, got $actual"; exit 1; }
+          }
+          assert_cached_runtime() {
+            local empty_home
+            empty_home=$(mktemp -d)
+            HOME="$empty_home" /usr/bin/racket -e '(require racket/list racket/match) (displayln "rpm-cached-transaction-ok")' | grep -F rpm-cached-transaction-ok
+            HOME="$empty_home" /usr/bin/rhombus --version | grep -F Rhombus
+            rm -rf "$empty_home"
+          }
+          legacy_root="$GITHUB_WORKSPACE/legacy-rpm"
+          mkdir -p "$legacy_root/BUILD" "$legacy_root/BUILDROOT" "$legacy_root/RPMS" "$legacy_root/SOURCES" "$legacy_root/SPECS" "$legacy_root/SRPMS"
+          printf '%s\n'             'Name: racket9-cached'             'Version: 9.2.2'             "Release: 6.$RPM_SYSTEM"             'Summary: Legacy split-name migration fixture'             'License: MIT'             'BuildArch: noarch'             'Conflicts: racket9'             '%description'             'Legacy migration fixture.'             '%files'             > "$legacy_root/SPECS/racket9-cached.spec"
+          rpmbuild -bb --define "_topdir $legacy_root" "$legacy_root/SPECS/racket9-cached.spec"
+          legacy_rpm=$(find "$legacy_root/RPMS" -name 'racket9-cached-*.rpm' -type f -print -quit)
+          [ -n "$legacy_rpm" ] || { echo 'legacy migration fixture RPM was not built'; exit 1; }
+          rpm -i "$legacy_rpm"
+          rpm -q racket9-cached
+          mkdir -p /var/cache/racket/compiled
+          touch /var/cache/racket/compiled/legacy-sentinel
+          $pm -y install "$postinstall_rpm"
+          if rpm -q racket9-cached >/dev/null 2>&1; then
+            echo 'legacy racket9-cached was not obsoleted by racket9'
+            exit 1
+          fi
+          [ ! -e /var/cache/racket/compiled ] || { echo 'legacy unversioned cache was not removed'; exit 1; }
+          assert_release "$RPM_RELEASE.1.postinstall.$RPM_SYSTEM"
+          find "$dynamic_cache_root" -path '*/compiled/*.zo' -type f -print -quit | grep -q .
+          $pm -y --disablerepo='*' --enablerepo=racket-transaction-cached --refresh distro-sync "$PACKAGE_NAME"
+          assert_release "$RPM_RELEASE.2.cached.$RPM_SYSTEM"
+          [ ! -e "$dynamic_cache_root" ] || { echo 'cached upgrade left stale dynamic cache'; exit 1; }
+          find "$immutable_cache_root" -path '*/compiled/*.zo' -type f -print -quit | grep -q .
+          assert_cached_runtime
+          $pm -y --disablerepo='*' --enablerepo=racket-transaction-postinstall --refresh distro-sync "$PACKAGE_NAME"
+          assert_release "$RPM_RELEASE.1.postinstall.$RPM_SYSTEM"
+          [ ! -e "$immutable_cache_root" ] || { echo 'postinstall downgrade left immutable payload cache'; exit 1; }
+          find "$dynamic_cache_root" -path '*/compiled/*.zo' -type f -print -quit | grep -q .
+          rpm -Uvh --replacepkgs "$postinstall_rpm"
+          assert_release "$RPM_RELEASE.1.postinstall.$RPM_SYSTEM"
+          $pm -y --disablerepo='*' --enablerepo=racket-transaction-cached --refresh distro-sync "$PACKAGE_NAME"
+          assert_release "$RPM_RELEASE.2.cached.$RPM_SYSTEM"
+          assert_cached_runtime
+          rpm -Uvh --replacepkgs "$cached_rpm"
+          assert_release "$RPM_RELEASE.2.cached.$RPM_SYSTEM"
+          [ ! -e "$dynamic_cache_root" ] || { echo 'cached reinstall left stale dynamic cache'; exit 1; }
+          find "$immutable_cache_root" -path '*/compiled/*.zo' -type f -print -quit | grep -q .
+          assert_cached_runtime
+          rpm -V "$PACKAGE_NAME"
+          rpm -e "$PACKAGE_NAME"
+          [ ! -e "$dynamic_cache_root" ] || { echo 'final erase left dynamic cache'; exit 1; }
+          [ ! -e "$immutable_cache_root" ] || { echo 'final erase left immutable cache'; exit 1; }
+
+  publish-rpm:
+    needs:
+      - build-rpm
+      - test-rpm-transactions
     runs-on: ubuntu-24.04
     permissions:
       actions: read
       contents: write
     steps:
+      - name: Checkout rpm-racket
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
       - name: Download RPM artifacts
         uses: actions/download-artifact@v6
         with:
@@ -328,14 +537,70 @@ jobs:
           path: release-assets
           merge-multiple: true
 
+      - name: Build system-isolated channel repositories
+        shell: bash
+        env:
+          RELEASE_TAG: 'v9.2.2-r7'
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y createrepo-c rpm
+          site_root="$GITHUB_WORKSPACE/pages-site"
+          rm -rf "$site_root"
+          mkdir -p "$site_root"
+          cp racket9-*.repo "$site_root/"
+          mapfile -t rpm_files < <(find "$GITHUB_WORKSPACE/release-assets" -maxdepth 2 -name '*.rpm' ! -name '*.src.rpm' -type f | sort)
+          [ "${#rpm_files[@]}" -eq 16 ] || { echo 'unexpected binary RPM count for repository publication'; exit 1; }
+          for rpm_file in "${rpm_files[@]}"; do
+            release=$(rpm -qp --qf '%{RELEASE}' "$rpm_file")
+            arch=$(rpm -qp --qf '%{ARCH}' "$rpm_file")
+            system="${release##*.}"
+            case "$release" in
+              *.2.cached.*) cache_mode=cached ;;
+              *.1.postinstall.*) cache_mode=postinstall ;;
+              *) echo "unrecognized cache-mode Release: $release"; exit 1 ;;
+            esac
+            case "$system" in
+              el9|fc40|fc43|fc44|openeuler2203|openeuler2403) ;;
+              *) echo "unsupported RPM system in Release: $release"; exit 1 ;;
+            esac
+            repo_root="$site_root/repo/$cache_mode/$system/$arch"
+            mkdir -p "$repo_root"
+            cp "$rpm_file" "$repo_root/"
+          done
+          release_base="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/$RELEASE_TAG/"
+          while IFS= read -r repo_root; do
+            createrepo_c --compress-type gz --baseurl "$release_base" "$repo_root"
+            rm -f "$repo_root"/*.rpm
+            test -s "$repo_root/repodata/repomd.xml"
+            primary_xml=$(find "$repo_root/repodata" -maxdepth 1 -name '*primary.xml.gz' -type f -print -quit)
+            [ -n "$primary_xml" ] || { echo "primary metadata is missing: $repo_root"; exit 1; }
+            zgrep -F "xml:base=\"$release_base\"" "$primary_xml" >/dev/null || { echo "primary metadata lacks Release base URL: $repo_root"; exit 1; }
+            zgrep -E 'location .*href="[^/]+[.]rpm"' "$primary_xml" >/dev/null || { echo "primary metadata lacks basename-only RPM location: $repo_root"; exit 1; }
+            if zgrep -E 'location .*href="[^"]*/' "$primary_xml" >/dev/null; then
+              echo "primary metadata contains a nested RPM location: $repo_root"
+              exit 1
+            fi
+          done < <(find "$site_root/repo" -type f -name '*.rpm' -exec dirname {} \; | sort -u)
+          if find "$site_root" -type f -name '*.rpm' -print -quit | grep -q .; then
+            echo 'Pages repository must contain metadata only, not RPM payloads'
+            exit 1
+          fi
+
+      - name: Upload RPM repository Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: pages-site
+
       - name: Publish RPM release assets
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
-          RELEASE_TAG: 'v9.2.2'
-          RELEASE_NAME: 'Racket 9.2.2 RPM packages'
+          RELEASE_TAG: 'v9.2.2-r7'
+          RELEASE_NAME: 'Racket 9.2.2 RPM packages R7'
           CREATE_RELEASE: 'true'
+          BUILD_SHA: ${{ github.sha }}
           PACKAGE_NAME: 'racket9'
           PACKAGE_VERSION: '9.2.2'
           EXPECTED_RPM_COUNT: 16
@@ -352,6 +617,7 @@ jobs:
             exit 1
           fi
           declare -A seen
+          expected_assets=$(mktemp)
           for rpm_file in "${rpm_files[@]}"; do
             asset_name="${rpm_file##*/}"
             if [ -n "${seen[$asset_name]:-}" ]; then
@@ -359,18 +625,59 @@ jobs:
               exit 1
             fi
             seen["$asset_name"]=1
+            printf '%s\n' "$asset_name" >> "$expected_assets"
           done
+          sort -o "$expected_assets" "$expected_assets"
           printf 'Release assets before upload for %s:\n' "$RELEASE_TAG"
           gh api "repos/${GITHUB_REPOSITORY}/releases/tags/$RELEASE_TAG" --jq '.assets[].name' || true
-          if ! gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+          git fetch --force --tags origin
+          tag_exists=false
+          if git rev-parse -q --verify "refs/tags/$RELEASE_TAG^{commit}" >/dev/null; then
+            tag_exists=true
+            tag_sha=$(git rev-list -n 1 "refs/tags/$RELEASE_TAG")
+            if [ "$tag_sha" != "$BUILD_SHA" ]; then
+              echo "Immutable release tag $RELEASE_TAG points to $tag_sha, not current build $BUILD_SHA"
+              exit 1
+            fi
+          fi
+          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            [ "$tag_exists" = true ] || { echo "release exists without fetched tag: $RELEASE_TAG"; exit 1; }
+          else
             if [ "$CREATE_RELEASE" != true ]; then
               echo "GitHub release does not exist and create-release is false: $RELEASE_TAG"
               exit 1
             fi
-            gh release create "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --title "$RELEASE_NAME" --notes "Generated RPM artifacts for $PACKAGE_NAME $PACKAGE_VERSION."
+            if [ "$tag_exists" = true ]; then
+              gh release create "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --verify-tag --title "$RELEASE_NAME" --notes "Generated RPM artifacts for $PACKAGE_NAME $PACKAGE_VERSION."
+            else
+              gh release create "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --target "$BUILD_SHA" --title "$RELEASE_NAME" --notes "Generated RPM artifacts for $PACKAGE_NAME $PACKAGE_VERSION."
+            fi
           fi
+          while IFS=$'\t' read -r asset_id asset_name; do
+            [ -n "$asset_id" ] || continue
+            if ! grep -Fx "$asset_name" "$expected_assets" >/dev/null; then
+              printf 'Deleting stale release asset: %s\n' "$asset_name"
+              gh api --method DELETE "repos/$GITHUB_REPOSITORY/releases/assets/$asset_id"
+            fi
+          done < <(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG" --jq '.assets[] | [.id, .name] | @tsv')
           printf 'Uploading RPM files to release %s:\n' "$RELEASE_TAG"
           printf '  %s\n' "${rpm_files[@]}"
           gh release upload "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" "${rpm_files[@]}" --clobber
           printf 'Release assets after upload for %s:\n' "$RELEASE_TAG"
-          gh api "repos/${GITHUB_REPOSITORY}/releases/tags/$RELEASE_TAG" --jq '.assets[].name'
+          actual_assets=$(mktemp)
+          gh api "repos/${GITHUB_REPOSITORY}/releases/tags/$RELEASE_TAG" --jq '.assets[].name' | sort | tee "$actual_assets"
+          diff -u "$expected_assets" "$actual_assets"
+
+  deploy-rpm-repository:
+    needs: publish-rpm
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy RPM repository to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

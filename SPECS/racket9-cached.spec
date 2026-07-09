@@ -1,30 +1,33 @@
-%{!?package_name:%global package_name racket9}
-%{!?cache_mode:%global cache_mode postinstall}
-%global base_package_name racket9
-%global cached_package_name racket9-cached
-Name: %{package_name}
+%global cache_mode cached
+Name: racket9
 Version: 9.2.2
-%{!?package_system:%global package_system openeuler2403}
-%{!?package_release:%global package_release 6}
-Release: %{package_release}.%{package_system}
+%global package_system openeuler2403
+%global package_release 7
+Release: %{package_release}.2.cached.%{package_system}
 Summary: Racket programming language
 License: MIT OR Apache-2.0
 URL: https://racket-lang.org/
 Source0: https://github.com/CutieDeng/racket/releases/download/v9.2.2/racket-minimal-9.2.2-src.tgz
-AutoReqProv: no
+BuildRequires: gcc
+BuildRequires: libffi-devel
+BuildRequires: make
+BuildRequires: ncurses-devel
+BuildRequires: openssl-devel
+BuildRequires: perl
+BuildRequires: sqlite-devel
+BuildRequires: zlib-devel
 Requires: libedit
-%if "%{cache_mode}" == "cached"
-Provides: %{base_package_name} = %{version}-%{release}
-Conflicts: %{base_package_name}
-%else
-Conflicts: %{cached_package_name}
-%endif
+Provides: racket9(cache-mode-cached) = %{version}-%{release}
+# Bounded migration from the previously published split-name cached package.
+Obsoletes: racket9-cached < %{version}-%{package_release}
 # Racket CS stores its boot image in the .rackboot ELF section. RPM debuginfo
 # extraction removes that section on openEuler, so the package must keep debug
 # data in the main executables.
 %global debug_package %{nil}
 %global __brp_compress %{nil}
 %global package_prefix /usr
+%global immutable_cache_root %{package_prefix}/lib/racket/%{version}/compiled-cache
+%global dynamic_cache_root /var/cache/racket/%{version}/compiled
 %global source_sha256 fc25e3ca9996f96b41edac3ab2d1517a8c42e2d0ed9107b81252bcd62895669e
 
 %description
@@ -48,7 +51,7 @@ fi
 %setup -q -n racket-9.2.2
 
 %build
-sed -i 's|))$|) (default-scope . "installation") (compiled-file-cache-roots . (user system)) (compiled-file-system-cache-root . "/var/cache/racket/compiled"))|' etc/config.rktd
+sed -i 's|))$|) (default-scope . "installation") (compiled-file-cache-roots . (user system "%{immutable_cache_root}")) (compiled-file-system-cache-root . "%{dynamic_cache_root}"))|' etc/config.rktd
 sed -i 's/"1[.]1"/"3"/g' collects/openssl/libssl.rkt collects/openssl/libcrypto.rkt
 cd src
 ./configure \
@@ -70,10 +73,9 @@ find "%{buildroot}" -type d -name compiled ! -path '*/info-domain/compiled' -pru
 %if "%{cache_mode}" == "cached"
 config_dir="%{buildroot}%{_sysconfdir}/racket"
 config_file="$config_dir/config.rktd"
+config_backup="$config_file.package-racket-final"
 runtime_config_dir="%{_sysconfdir}/racket"
-runtime_cache_parent="/var/cache/racket"
-runtime_cache_root="/var/cache/racket/compiled"
-staged_cache_parent="%{buildroot}$runtime_cache_parent"
+runtime_cache_root="%{immutable_cache_root}"
 staged_cache_root="%{buildroot}$runtime_cache_root"
 racket_bin="%{buildroot}%{package_prefix}/bin/racket"
 runtime_share_dir="%{package_prefix}/share/racket"
@@ -92,6 +94,12 @@ cleanup_runtime_links() {
     done
   fi
 }
+cleanup_staging() {
+  cleanup_runtime_links
+  if [ -f "$config_backup" ]; then
+    mv -f "$config_backup" "$config_file"
+  fi
+}
 add_runtime_link() {
   runtime_link_target="$1"
   runtime_link_path="$2"
@@ -104,13 +112,15 @@ add_runtime_link() {
   runtime_links="$runtime_link_path
 $runtime_links"
 }
-mkdir -p "$staged_cache_parent"
-trap cleanup_runtime_links EXIT
+cp "$config_file" "$config_backup"
+sed -i 's|compiled-file-system-cache-root . "%{dynamic_cache_root}"|compiled-file-system-cache-root . "%{immutable_cache_root}"|' "$config_file"
+grep -F '(compiled-file-system-cache-root . "%{immutable_cache_root}")' "$config_file" >/dev/null || { echo "failed to select immutable build cache root" >&2; exit 1; }
+mkdir -p "$staged_cache_root"
+trap cleanup_staging EXIT
 add_runtime_link "%{buildroot}$runtime_share_dir" "$runtime_share_dir"
 add_runtime_link "%{buildroot}$runtime_lib_dir" "$runtime_lib_dir"
 add_runtime_link "$config_dir" "$runtime_config_dir"
-add_runtime_link "$staged_cache_parent" "$runtime_cache_parent"
-if ! "$racket_bin" -X "$runtime_collects_dir" -G "$runtime_config_dir" -N raco -l- raco setup --system --no-user --reset-cache -D --no-pkg-deps --no-launcher; then
+if ! "$racket_bin" -X "$runtime_collects_dir" -G "$runtime_config_dir" -N raco -l- raco setup --system --no-user --reset-cache --unsafe-delete-all -D --no-pkg-deps --no-launcher; then
   exit 1
 fi
 if ! "$racket_bin" -U -R "$runtime_cache_root" -X "$runtime_collects_dir" -G "$runtime_config_dir" -N rhombus -l- rhombus/run.rhm --version >/dev/null; then
@@ -119,9 +129,9 @@ fi
 if ! "$racket_bin" -U -R "$runtime_cache_root" -X "$runtime_collects_dir" -G "$runtime_config_dir" -N rhombus -l- rhombus/run.rhm -e 'println("package-racket-rhombus-cache")' >/dev/null; then
   exit 1
 fi
-rhombus_ephemeral_cache="%{buildroot}$runtime_share_dir/pkgs/rhombus-lib/rhombus/private/compiled/ephemeral/demod"
-find "$rhombus_ephemeral_cache" -path '*/compiled/*.zo' -type f -print -quit | grep -q . || { echo "staged Rhombus demod cache is empty: $rhombus_ephemeral_cache" >&2; exit 1; }
-cleanup_runtime_links
+rhombus_ephemeral_root="%{buildroot}$runtime_share_dir/pkgs/rhombus-lib/rhombus/private/compiled/ephemeral"
+rm -rf "$rhombus_ephemeral_root"
+cleanup_staging
 trap - EXIT
 move_cache_tree() {
   from_source="$1"
@@ -142,12 +152,13 @@ runtime_collects_dir="%{package_prefix}/share/racket/collects"
 runtime_pkgs_dir="%{package_prefix}/share/racket/pkgs"
 move_cache_tree "%{buildroot}$runtime_collects_dir" "$runtime_collects_dir"
 move_cache_tree "%{buildroot}$runtime_pkgs_dir" "$runtime_pkgs_dir"
-rm -f "%{buildroot}/var/cache/racket/racket-compiled-cache.log"
+rm -f "%{buildroot}%{package_prefix}/lib/racket/%{version}/racket-compiled-cache.log"
 find "$staged_cache_root" -type d -empty -delete 2>/dev/null || :
 runtime_collects_cache="$staged_cache_root/${runtime_collects_dir#/}"
 runtime_pkgs_cache="$staged_cache_root/${runtime_pkgs_dir#/}"
 find "$runtime_collects_cache" -path '*/compiled/*.zo' -type f -print -quit | grep -q . || { echo "runtime-keyed staged system compiled cache is empty: $runtime_collects_cache" >&2; exit 1; }
 find "$runtime_pkgs_cache" -path '*/compiled/*.zo' -type f -print -quit | grep -q . || { echo "runtime-keyed staged package compiled cache is empty: $runtime_pkgs_cache" >&2; exit 1; }
+[ ! -e "$rhombus_ephemeral_root" ] || { echo "Rhombus ephemeral cache must not be packaged: $rhombus_ephemeral_root" >&2; exit 1; }
 %endif
 
 manifest="%{name}.files"
@@ -171,8 +182,10 @@ while IFS= read -r path; do
 done < "$paths"
 grep -Eq '^(%dir )?(/bin|/boot|/dev|/etc|/lib|/lib64|/opt|/run|/sbin|/usr|/usr/bin|/usr/etc|/usr/games|/usr/include|/usr/lib|/usr/lib64|/usr/libexec|/usr/local|/usr/sbin|/usr/share|/usr/share/applications|/usr/share/doc|/usr/share/icons|/usr/share/icons/hicolor|/usr/share/man|/usr/share/man/man1|/usr/share/man/man2|/usr/share/man/man3|/usr/share/man/man4|/usr/share/man/man5|/usr/share/man/man6|/usr/share/man/man7|/usr/share/man/man8|/var)$' "$manifest" && exit 1
 
-%if "%{cache_mode}" == "postinstall"
 %posttrans
+rm -rf /var/cache/racket/compiled
+rm -f /var/cache/racket/racket-compiled-cache.log
+%if "%{cache_mode}" == "postinstall"
 setup_jobs=
 if [ -r /etc/os-release ]; then
   . /etc/os-release
@@ -181,42 +194,46 @@ if [ -r /etc/os-release ]; then
   fi
 fi
 if [ -n "$setup_jobs" ]; then
-  raco setup $setup_jobs --system --no-user --reset-cache -D --no-pkg-deps
+  if ! %{package_prefix}/bin/raco setup $setup_jobs --system --no-user --reset-cache --unsafe-delete-all -D --no-pkg-deps --no-launcher; then
+    exit 1
+  fi
 else
-  raco setup --system --no-user --reset-cache -D --no-pkg-deps
+  if ! %{package_prefix}/bin/raco setup --system --no-user --reset-cache --unsafe-delete-all -D --no-pkg-deps --no-launcher; then
+    exit 1
+  fi
 fi
-compiled_cache_root="/var/cache/racket/compiled"
+compiled_cache_root="%{dynamic_cache_root}"
 mkdir -p "$compiled_cache_root"
 empty_home=$(mktemp -d)
-if ! HOME="$empty_home" racket -U -R "$compiled_cache_root" -N rhombus -l- rhombus/run.rhm --version >/dev/null; then
+if ! HOME="$empty_home" %{package_prefix}/bin/racket -U -R "$compiled_cache_root" -N rhombus -l- rhombus/run.rhm --version >/dev/null; then
   rm -rf "$empty_home"
   exit 1
 fi
-if ! HOME="$empty_home" racket -U -R "$compiled_cache_root" -N rhombus -l- rhombus/run.rhm -e 'println("package-racket-rhombus-cache")' >/dev/null; then
+if ! HOME="$empty_home" %{package_prefix}/bin/racket -U -R "$compiled_cache_root" -N rhombus -l- rhombus/run.rhm -e 'println("package-racket-rhombus-cache")' >/dev/null; then
   rm -rf "$empty_home"
   exit 1
 fi
 rm -rf "$empty_home"
+rm -rf %{package_prefix}/share/racket/pkgs/rhombus-lib/rhombus/private/compiled/ephemeral
+rm -f "/var/cache/racket/%{version}/racket-compiled-cache.log"
+%else
+rm -rf "%{dynamic_cache_root}"
+rm -f "/var/cache/racket/%{version}/racket-compiled-cache.log"
+rm -rf %{package_prefix}/share/racket/pkgs/rhombus-lib/rhombus/private/compiled/ephemeral
+find "%{immutable_cache_root}" -path '*/compiled/*.zo' -type f -print -quit | grep -q . || { echo "packaged immutable cache is empty: %{immutable_cache_root}" >&2; exit 1; }
+[ ! -e %{package_prefix}/share/racket/pkgs/rhombus-lib/rhombus/private/compiled/ephemeral ] || { echo "Rhombus ephemeral cache must not be installed" >&2; exit 1; }
 %endif
-
-%if "%{cache_mode}" == "postinstall"
-%preun
-if [ "$1" = "0" ] && ! rpm -q --quiet %{cached_package_name} >/dev/null 2>&1 && command -v raco >/dev/null 2>&1; then
-  raco setup --system --delete-cache || :
-fi
-%endif
+exit 0
 
 %postun
-%if "%{cache_mode}" == "cached"
-other_package="%{base_package_name}"
-%else
-other_package="%{cached_package_name}"
-%endif
-if [ "$1" = "0" ] && ! rpm -q --quiet "$other_package" >/dev/null 2>&1; then
+if [ "$1" = "0" ]; then
   rm -rf /var/cache/racket/compiled
-  rm -rf %{package_prefix}/share/racket/pkgs/rhombus-lib/rhombus/private/compiled/ephemeral/demod
-  rmdir %{package_prefix}/share/racket/pkgs/rhombus-lib/rhombus/private/compiled/ephemeral %{package_prefix}/share/racket/pkgs/rhombus-lib/rhombus/private/compiled 2>/dev/null || :
+  rm -f /var/cache/racket/racket-compiled-cache.log
+  rm -rf "%{dynamic_cache_root}"
+  rm -f "/var/cache/racket/%{version}/racket-compiled-cache.log"
+  rmdir "/var/cache/racket/%{version}" /var/cache/racket 2>/dev/null || :
 fi
+exit 0
 
 %files -f %{name}.files
 %defattr(-,root,root,-)

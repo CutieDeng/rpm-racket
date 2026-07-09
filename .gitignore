@@ -6,3 +6,6 @@
 .build/
 artifacts/
 *.rpm
+!repo/
+!repo/**/
+!repo/**/*.rpm

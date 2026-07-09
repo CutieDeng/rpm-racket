@@ -11,7 +11,7 @@ usage() {
   cat <<'USAGE'
 Usage: scripts/build-rpm.sh --artifact-dir PATH --work-dir PATH --rpm-system SYSTEM --rpm-release RELEASE --rpm-arch ARCH [options]
 
-Build a binary RPM from SPECS/racket9.spec and a stable source archive. All
+Build a binary RPM and matching SRPM from the selected concrete spec. All
 mutable paths are named.
 
 Options:
@@ -21,7 +21,7 @@ Options:
   --work-dir PATH        Build work directory for rpmbuild.
   --rpm-system SYSTEM    el9, fc40, fc43, fc44, openeuler2203, or openeuler2403.
   --rpm-release RELEASE  Package release base, for example 1. The system suffix is appended separately.
-  --cache-mode MODE      postinstall or cached. Defaults to postinstall.
+  --cache-mode MODE      cached or postinstall. Defaults to cached.
   --prefix PATH          Install prefix inside the package. Defaults to generated /usr.
   --rpm-arch ARCH        x86_64, amd64, x64, aarch64, or arm64.
   --jobs N               Parallel jobs passed to rpmbuild through _smp_mflags.
@@ -80,15 +80,19 @@ if [ -n "$SOURCE_ARCHIVE" ] && [ "$SOURCE_URL_EXPLICIT" = 1 ]; then
 fi
 
 maybe_require_exe "$DRY_RUN" tar
+maybe_require_exe "$DRY_RUN" awk
 maybe_require_exe "$DRY_RUN" rpm
 maybe_require_exe "$DRY_RUN" rpmbuild
 
 RPMBUILD_ROOT="$WORK_DIR/rpmbuild"
-SPEC_PATH="$RPMBUILD_ROOT/SPECS/$SPEC_NAME"
+SOURCE_SPEC_NAME=$(spec_name_for_cache_mode "$CACHE_MODE")
+SPEC_PATH="$RPMBUILD_ROOT/SPECS/$BASE_PACKAGE_NAME.spec"
 SOURCE_PATH="$RPMBUILD_ROOT/SOURCES/$SOURCE_ARCHIVE_NAME"
-RPM_FULL_RELEASE=$(rpm_full_release "$RPM_RELEASE" "$RPM_SYSTEM")
+RPM_FULL_RELEASE=$(rpm_full_release "$RPM_RELEASE" "$RPM_SYSTEM" "$CACHE_MODE")
 RPM_NAME=$(rpm_name_for_arch "$NORMALIZED_ARCH" "$RPM_RELEASE" "$RPM_SYSTEM" "$CACHE_MODE")
 RPM_OUTPUT="$RPMBUILD_ROOT/RPMS/$NORMALIZED_ARCH/$RPM_NAME"
+SRPM_NAME=$(srpm_name "$RPM_RELEASE" "$RPM_SYSTEM" "$CACHE_MODE")
+SRPM_OUTPUT="$RPMBUILD_ROOT/SRPMS/$SRPM_NAME"
 
 printf 'Repository root: %s\n' "$REPO_ROOT"
 printf 'RPM system: %s\n' "$RPM_SYSTEM"
@@ -101,32 +105,24 @@ printf 'RPM output: %s\n' "$ARTIFACT_DIR/$RPM_NAME"
 
 prepare_rpmbuild_tree "$DRY_RUN" "$RPMBUILD_ROOT"
 if [ "$DRY_RUN" = 0 ]; then
-  cp "$REPO_ROOT/SPECS/$SPEC_NAME" "$SPEC_PATH"
+  materialize_spec "$REPO_ROOT/SPECS/$SOURCE_SPEC_NAME" "$SPEC_PATH" "$CACHE_MODE" "$RPM_RELEASE" "$RPM_SYSTEM" "$PREFIX"
 fi
 prepare_source_archive "$DRY_RUN" "$SOURCE_ARCHIVE" "$SOURCE_URL" "$SOURCE_PATH"
 if [ "${#RPMBUILD_ARGS[@]}" -gt 0 ]; then
-  run_cmd "$DRY_RUN" rpmbuild -bb --target "$NORMALIZED_ARCH" \
+  run_cmd "$DRY_RUN" rpmbuild -ba --target "$NORMALIZED_ARCH" \
     --define "_topdir $RPMBUILD_ROOT" \
     --define "_build_id_links none" \
     --define "_sysconfdir /etc" \
     --define "package_prefix $PREFIX" \
-    --define "package_name $RPM_PACKAGE_NAME" \
-    --define "cache_mode $CACHE_MODE" \
-    --define "package_system $RPM_SYSTEM" \
-    --define "package_release $RPM_RELEASE" \
     --define "_smp_mflags -j$JOBS" \
     "${RPMBUILD_ARGS[@]}" \
     "$SPEC_PATH"
 else
-  run_cmd "$DRY_RUN" rpmbuild -bb --target "$NORMALIZED_ARCH" \
+  run_cmd "$DRY_RUN" rpmbuild -ba --target "$NORMALIZED_ARCH" \
     --define "_topdir $RPMBUILD_ROOT" \
     --define "_build_id_links none" \
     --define "_sysconfdir /etc" \
     --define "package_prefix $PREFIX" \
-    --define "package_name $RPM_PACKAGE_NAME" \
-    --define "cache_mode $CACHE_MODE" \
-    --define "package_system $RPM_SYSTEM" \
-    --define "package_release $RPM_RELEASE" \
     --define "_smp_mflags -j$JOBS" \
     "$SPEC_PATH"
 fi
@@ -135,8 +131,9 @@ if [ "$DRY_RUN" = 1 ]; then
   printf 'Would copy RPM artifact: %s -> %s\n' "$RPM_OUTPUT" "$ARTIFACT_DIR/$RPM_NAME"
 else
   require_nonempty_file "$RPM_OUTPUT"
+  require_nonempty_file "$SRPM_OUTPUT"
   mkdir -p "$ARTIFACT_DIR"
   cp "$RPM_OUTPUT" "$ARTIFACT_DIR/$RPM_NAME"
-  "$REPO_ROOT/scripts/verify-rpm.sh" --rpm "$ARTIFACT_DIR/$RPM_NAME" --rpm-system "$RPM_SYSTEM" --rpm-release "$RPM_RELEASE" --rpm-arch "$NORMALIZED_ARCH" --cache-mode "$CACHE_MODE"
+  "$REPO_ROOT/scripts/verify-rpm.sh" --rpm "$ARTIFACT_DIR/$RPM_NAME" --rpm-system "$RPM_SYSTEM" --rpm-release "$RPM_RELEASE" --rpm-arch "$NORMALIZED_ARCH" --cache-mode "$CACHE_MODE" --prefix "$PREFIX"
   printf 'RPM package: %s\n' "$ARTIFACT_DIR/$RPM_NAME"
 fi

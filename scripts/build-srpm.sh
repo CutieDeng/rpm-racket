@@ -11,7 +11,7 @@ usage() {
   cat <<'USAGE'
 Usage: scripts/build-srpm.sh --artifact-dir PATH --work-dir PATH --rpm-system SYSTEM --rpm-release RELEASE --rpm-arch ARCH [options]
 
-Build a source RPM from SPECS/racket9.spec and a stable source archive.
+Build a source RPM from the selected concrete flavor spec.
 
 Options:
   --source-archive PATH  Local racket-minimal-9.2.2-src.tgz to copy into rpmbuild.
@@ -20,6 +20,7 @@ Options:
   --work-dir PATH        Build work directory for rpmbuild.
   --rpm-system SYSTEM    el9, fc40, fc43, fc44, openeuler2203, or openeuler2403.
   --rpm-release RELEASE  Package release base, for example 1. The system suffix is appended separately.
+  --cache-mode MODE      cached or postinstall. Defaults to cached.
   --prefix PATH          Install prefix inside the package. Defaults to generated /usr.
   --rpm-arch ARCH        x86_64, amd64, x64, aarch64, or arm64.
   --jobs N               Parallel jobs recorded in generated build macros.
@@ -39,6 +40,7 @@ RPM_RELEASE=
 RPM_ARCH=
 JOBS=1
 PREFIX="$DEFAULT_PREFIX"
+CACHE_MODE="$DEFAULT_CACHE_MODE"
 RPMBUILD_ARGS=()
 
 while [ $# -gt 0 ]; do
@@ -49,6 +51,7 @@ while [ $# -gt 0 ]; do
     --work-dir) [ $# -ge 2 ] || usage_error "missing value for --work-dir"; WORK_DIR="$2"; shift 2 ;;
     --rpm-system) [ $# -ge 2 ] || usage_error "missing value for --rpm-system"; RPM_SYSTEM="$2"; shift 2 ;;
     --rpm-release) [ $# -ge 2 ] || usage_error "missing value for --rpm-release"; RPM_RELEASE="$2"; shift 2 ;;
+    --cache-mode) [ $# -ge 2 ] || usage_error "missing value for --cache-mode"; CACHE_MODE="$2"; shift 2 ;;
     --prefix) [ $# -ge 2 ] || usage_error "missing value for --prefix"; PREFIX="$2"; shift 2 ;;
     --rpm-arch) [ $# -ge 2 ] || usage_error "missing value for --rpm-arch"; RPM_ARCH="$2"; shift 2 ;;
     --jobs) [ $# -ge 2 ] || usage_error "missing value for --jobs"; JOBS="$2"; shift 2 ;;
@@ -68,31 +71,35 @@ require_repo_root "$REPO_ROOT"
 [ -n "$RPM_ARCH" ] || usage_error "--rpm-arch is required"
 validate_rpm_system "$RPM_SYSTEM"
 validate_rpm_release "$RPM_RELEASE"
+validate_cache_mode "$CACHE_MODE"
 NORMALIZED_ARCH=$(normalize_arch "$RPM_ARCH")
 if [ -n "$SOURCE_ARCHIVE" ] && [ "$SOURCE_URL_EXPLICIT" = 1 ]; then
   usage_error "use either --source-archive or --source-url, not both"
 fi
 
 maybe_require_exe "$DRY_RUN" tar
+maybe_require_exe "$DRY_RUN" awk
 maybe_require_exe "$DRY_RUN" rpmbuild
 
 RPMBUILD_ROOT="$WORK_DIR/rpmbuild-srpm"
-SPEC_PATH="$RPMBUILD_ROOT/SPECS/$SPEC_NAME"
+SOURCE_SPEC_NAME=$(spec_name_for_cache_mode "$CACHE_MODE")
+SPEC_PATH="$RPMBUILD_ROOT/SPECS/$BASE_PACKAGE_NAME.spec"
 SOURCE_PATH="$RPMBUILD_ROOT/SOURCES/$SOURCE_ARCHIVE_NAME"
-RPM_FULL_RELEASE=$(rpm_full_release "$RPM_RELEASE" "$RPM_SYSTEM")
-SRPM_NAME=$(srpm_name "$RPM_RELEASE" "$RPM_SYSTEM")
+RPM_FULL_RELEASE=$(rpm_full_release "$RPM_RELEASE" "$RPM_SYSTEM" "$CACHE_MODE")
+SRPM_NAME=$(srpm_name "$RPM_RELEASE" "$RPM_SYSTEM" "$CACHE_MODE")
 SRPM_OUTPUT="$RPMBUILD_ROOT/SRPMS/$SRPM_NAME"
 
 printf 'Repository root: %s\n' "$REPO_ROOT"
 printf 'RPM system: %s\n' "$RPM_SYSTEM"
 printf 'RPM release: %s\n' "$RPM_RELEASE"
 printf 'RPM full release: %s\n' "$RPM_FULL_RELEASE"
+printf 'RPM cache mode: %s\n' "$CACHE_MODE"
 printf 'Source archive: %s\n' "${SOURCE_ARCHIVE:-$SOURCE_URL}"
 printf 'SRPM output: %s\n' "$ARTIFACT_DIR/$SRPM_NAME"
 
 prepare_rpmbuild_tree "$DRY_RUN" "$RPMBUILD_ROOT"
 if [ "$DRY_RUN" = 0 ]; then
-  cp "$REPO_ROOT/SPECS/$SPEC_NAME" "$SPEC_PATH"
+  materialize_spec "$REPO_ROOT/SPECS/$SOURCE_SPEC_NAME" "$SPEC_PATH" "$CACHE_MODE" "$RPM_RELEASE" "$RPM_SYSTEM" "$PREFIX"
 fi
 prepare_source_archive "$DRY_RUN" "$SOURCE_ARCHIVE" "$SOURCE_URL" "$SOURCE_PATH"
 if [ "${#RPMBUILD_ARGS[@]}" -gt 0 ]; then
@@ -100,8 +107,6 @@ if [ "${#RPMBUILD_ARGS[@]}" -gt 0 ]; then
     --define "_topdir $RPMBUILD_ROOT" \
     --define "_sysconfdir /etc" \
     --define "package_prefix $PREFIX" \
-    --define "package_system $RPM_SYSTEM" \
-    --define "package_release $RPM_RELEASE" \
     --define "_smp_mflags -j$JOBS" \
     "${RPMBUILD_ARGS[@]}" \
     "$SPEC_PATH"
@@ -110,8 +115,6 @@ else
     --define "_topdir $RPMBUILD_ROOT" \
     --define "_sysconfdir /etc" \
     --define "package_prefix $PREFIX" \
-    --define "package_system $RPM_SYSTEM" \
-    --define "package_release $RPM_RELEASE" \
     --define "_smp_mflags -j$JOBS" \
     "$SPEC_PATH"
 fi

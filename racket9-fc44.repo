@@ -1,0 +1,14 @@
+# GENERATED RPM REPOSITORY METADATA - DO NOT EDIT IN rpm-racket.
+# Source of truth: package-racket
+
+[cutiedeng-racket-fc44-cached]
+name=CutieDeng Racket RPM Repository (fc44, cached, default)
+baseurl=https://cutiedeng.github.io/rpm-racket/repo/cached/fc44/$basearch
+enabled=1
+gpgcheck=0
+
+[cutiedeng-racket-fc44-postinstall]
+name=CutieDeng Racket RPM Repository (fc44, postinstall, optional)
+baseurl=https://cutiedeng.github.io/rpm-racket/repo/postinstall/fc44/$basearch
+enabled=0
+gpgcheck=0

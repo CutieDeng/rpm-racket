@@ -5,19 +5,16 @@ set -euo pipefail
 # Generated entrypoint: rpm-common.sh
 
 BASE_PACKAGE_NAME='racket9'
-CACHED_PACKAGE_NAME='racket9-cached'
 PACKAGE_NAME="$BASE_PACKAGE_NAME"
 PACKAGE_VERSION='9.2.2'
 PACKAGE_SOURCE_VERSION='9.2.2'
 DEFAULT_RPM_SYSTEM='openeuler2403'
-DEFAULT_RPM_RELEASE='6'
+DEFAULT_RPM_RELEASE='7'
 DEFAULT_PREFIX='/usr'
-DEFAULT_CACHE_MODE=postinstall
+DEFAULT_CACHE_MODE=cached
 SOURCE_ARCHIVE_NAME='racket-minimal-9.2.2-src.tgz'
 DEFAULT_SOURCE_URL='https://github.com/CutieDeng/racket/releases/download/v9.2.2/racket-minimal-9.2.2-src.tgz'
 SOURCE_SHA256='fc25e3ca9996f96b41edac3ab2d1517a8c42e2d0ed9107b81252bcd62895669e'
-SPEC_NAME='racket9.spec'
-
 die() {
   printf 'ERROR: %s\n' "$*" >&2
   exit 1
@@ -36,7 +33,8 @@ repo_root_from_script() {
 require_repo_root() {
   local root="$1"
   [ -d "$root" ] || die "repository root does not exist: $root"
-  [ -f "$root/SPECS/$SPEC_NAME" ] || die "missing spec file: $root/SPECS/$SPEC_NAME"
+  [ -f "$root/SPECS/racket9-cached.spec" ] || die "missing spec file: $root/SPECS/racket9-cached.spec"
+  [ -f "$root/SPECS/racket9-postinstall.spec" ] || die "missing spec file: $root/SPECS/racket9-postinstall.spec"
   [ -f "$root/scripts/rpm-common.sh" ] || die "missing common script: $root/scripts/rpm-common.sh"
 }
 
@@ -130,16 +128,29 @@ validate_cache_mode() {
 package_name_for_cache_mode() {
   local mode="$1"
   validate_cache_mode "$mode"
+  printf '%s\n' "$BASE_PACKAGE_NAME"
+}
+
+cache_mode_rank() {
+  local mode="$1"
+  validate_cache_mode "$mode"
   case "$mode" in
-    postinstall) printf '%s\n' "$BASE_PACKAGE_NAME" ;;
-    cached) printf '%s\n' "$CACHED_PACKAGE_NAME" ;;
+    postinstall) printf '1\n' ;;
+    cached) printf '2\n' ;;
   esac
+}
+
+spec_name_for_cache_mode() {
+  local mode="$1"
+  validate_cache_mode "$mode"
+  printf '%s-%s.spec\n' "$BASE_PACKAGE_NAME" "$mode"
 }
 
 rpm_full_release() {
   local release="$1"
   local system="$2"
-  printf '%s.%s\n' "$release" "$system"
+  local mode="${3:-$DEFAULT_CACHE_MODE}"
+  printf '%s.%s.%s.%s\n' "$release" "$(cache_mode_rank "$mode")" "$mode" "$system"
 }
 
 rpm_name_for_arch() {
@@ -149,13 +160,35 @@ rpm_name_for_arch() {
   local mode="${4:-$DEFAULT_CACHE_MODE}"
   local package_name
   package_name=$(package_name_for_cache_mode "$mode")
-  printf '%s-%s-%s.%s.rpm\n' "$package_name" "$PACKAGE_VERSION" "$(rpm_full_release "$release" "$system")" "$arch"
+  printf '%s-%s-%s.%s.rpm\n' "$package_name" "$PACKAGE_VERSION" "$(rpm_full_release "$release" "$system" "$mode")" "$arch"
 }
 
 srpm_name() {
   local release="$1"
   local system="$2"
-  printf '%s-%s-%s.src.rpm\n' "$PACKAGE_NAME" "$PACKAGE_VERSION" "$(rpm_full_release "$release" "$system")"
+  local mode="${3:-$DEFAULT_CACHE_MODE}"
+  printf '%s-%s-%s.src.rpm\n' "$PACKAGE_NAME" "$PACKAGE_VERSION" "$(rpm_full_release "$release" "$system" "$mode")"
+}
+
+materialize_spec() {
+  local source_spec="$1"
+  local dest_spec="$2"
+  local mode="$3"
+  local release="$4"
+  local system="$5"
+  local prefix="$6"
+  validate_cache_mode "$mode"
+  awk -v mode="$mode" -v release="$release" -v target_system="$system" -v prefix="$prefix" '
+$1 == "%global" && $2 == "cache_mode" { print "%global cache_mode " mode; next }
+$1 == "%global" && $2 == "package_release" { print "%global package_release " release; next }
+$1 == "%global" && $2 == "package_system" { print "%global package_system " target_system; next }
+$1 == "%global" && $2 == "package_prefix" { print "%global package_prefix " prefix; next }
+{ print }
+' "$source_spec" > "$dest_spec"
+  grep -Fx "%global cache_mode $mode" "$dest_spec" >/dev/null || die "failed to materialize cache mode in spec"
+  grep -Fx "%global package_release $release" "$dest_spec" >/dev/null || die "failed to materialize release in spec"
+  grep -Fx "%global package_system $system" "$dest_spec" >/dev/null || die "failed to materialize system in spec"
+  grep -Fx "%global package_prefix $prefix" "$dest_spec" >/dev/null || die "failed to materialize prefix in spec"
 }
 
 reset_output_dir() {
