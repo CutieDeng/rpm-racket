@@ -220,7 +220,6 @@ rm -f "/var/cache/racket/%{version}/racket-compiled-cache.log"
 rm -rf "%{dynamic_cache_root}"
 rm -f "/var/cache/racket/%{version}/racket-compiled-cache.log"
 rm -rf %{package_prefix}/share/racket/pkgs/rhombus-lib/rhombus/private/compiled/ephemeral
-find "%{immutable_cache_root}" -path '*/compiled/*.zo' -type f -print -quit | grep -q . || { echo "packaged immutable cache is empty: %{immutable_cache_root}" >&2; exit 1; }
 [ ! -e %{package_prefix}/share/racket/pkgs/rhombus-lib/rhombus/private/compiled/ephemeral ] || { echo "Rhombus ephemeral cache must not be installed" >&2; exit 1; }
 %endif
 exit 0

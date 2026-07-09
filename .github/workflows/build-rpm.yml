@@ -430,6 +430,20 @@ jobs:
           path: transaction-assets
           merge-multiple: true
 
+      - name: Install RPM transaction dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          if command -v dnf >/dev/null 2>&1; then
+            pm=dnf
+          elif command -v yum >/dev/null 2>&1; then
+            pm=yum
+          else
+            echo 'dnf or yum is required for RPM transaction tests'
+            exit 1
+          fi
+          $pm -y install createrepo_c findutils rpm-build
+
       - name: Verify install upgrade downgrade reinstall and erase
         shell: bash
         env:
@@ -452,7 +466,6 @@ jobs:
             echo 'dnf or yum is required for RPM transaction tests'
             exit 1
           fi
-          $pm -y install createrepo_c rpm-build
           transaction_repo="$GITHUB_WORKSPACE/transaction-repo"
           mkdir -p "$transaction_repo/cached" "$transaction_repo/postinstall"
           cp "$cached_rpm" "$transaction_repo/cached/"
