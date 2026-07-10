@@ -105,18 +105,21 @@ printf '%s\n' "$provides" | grep -F "$BASE_PACKAGE_NAME(cache-mode-$CACHE_MODE)"
   || die "RPM metadata is missing cache-mode capability"
 scripts=$(rpm -qp --scripts "$RPM_PATH")
 if [ "$CACHE_MODE" = postinstall ]; then
-  printf '%s\n' "$scripts" | grep -F "$PREFIX/bin/racket -U" | grep -F -- '-R "$setup_bootstrap_root"' | grep -F -- "-X $PREFIX/share/racket/collects" | grep -F -- '-G "$setup_config_dir" -N raco -l- raco setup' | grep -F -- '--reset-cache --unsafe-delete-all' >/dev/null \
+  printf '%s\n' "$scripts" | grep -F "$PREFIX/bin/racket -U" | grep -F -- '-R "$compiled_cache_root"' | grep -F -- "-X $PREFIX/share/racket/collects" | grep -F -- '-G "$setup_config_dir" -N raco -l- raco setup' | grep -F -- '--no-user' >/dev/null \
     || die "RPM scriptlets do not build the system compiled cache"
-  printf '%s\n' "$scripts" | grep -F 'could not prepare Racket setup bootstrap config' >/dev/null \
-    || die "RPM scriptlets do not isolate setup from the cache being reset"
-  printf '%s\n' "$scripts" | grep -F 'setup_bootstrap_root="$setup_config_dir/compiled"' >/dev/null \
-    || die "RPM scriptlets do not keep bootstrap bytecode under the temporary setup directory"
+  printf '%s\n' "$scripts" | grep -F 'could not prepare isolated Racket setup config' >/dev/null \
+    || die "RPM scriptlets do not isolate setup from installed cache-root policy"
+  printf '%s\n' "$scripts" | grep -F 'rm -rf "$compiled_cache_root"' >/dev/null \
+    || die "RPM scriptlets do not reset the compiled cache before Racket starts"
   printf '%s\n' "$scripts" | grep -F 'package-racket-rhombus-cache' >/dev/null \
     || die "RPM scriptlets do not warm Rhombus into the dynamic cache"
 else
   if printf '%s\n' "$scripts" | grep -F 'raco setup' >/dev/null; then
     die "cached RPM scriptlets unexpectedly build the system compiled cache"
   fi
+fi
+if printf '%s\n' "$scripts" | grep -E -- '--system|--reset-cache|--unsafe-delete-all' >/dev/null; then
+  die "RPM scriptlets retain in-process compiled-cache reset options"
 fi
 printf '%s\n' "$scripts" | grep -F 'cleanup_rhombus_ephemeral' >/dev/null \
   || die "RPM scriptlets do not clean Rhombus ephemeral compiled state"
