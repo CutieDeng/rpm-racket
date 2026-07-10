@@ -498,6 +498,13 @@ jobs:
           mkdir -p /var/cache/racket/compiled
           touch /var/cache/racket/compiled/legacy-sentinel
           $pm -y install "$postinstall_rpm"
+          [ ! -e "/root/.local/share/racket/$PACKAGE_VERSION" ] || { echo 'postinstall transaction created a root addon tree'; exit 1; }
+          if [ -n "${HOME:-}" ]; then
+            [ ! -e "$HOME/.local/share/racket/$PACKAGE_VERSION" ] || { echo 'postinstall transaction created a HOME addon tree'; exit 1; }
+          fi
+          [ ! -e /root/.cache/racket/compiled ] || { echo 'postinstall transaction created a root compiled cache'; exit 1; }
+          user_compiled_cache="${XDG_CACHE_HOME:-${HOME:-/root}/.cache}/racket/compiled"
+          [ ! -e "$user_compiled_cache" ] || { echo "postinstall transaction created a user compiled cache: $user_compiled_cache"; exit 1; }
           if rpm -q racket9-cached >/dev/null 2>&1; then
             echo 'legacy racket9-cached was not obsoleted by racket9'
             exit 1
