@@ -2,7 +2,7 @@
 Name: racket9
 Version: 9.2.3
 %global package_system openeuler2403
-%global package_release 2
+%global package_release 3
 Release: %{package_release}.2.cached.%{package_system}
 Summary: Racket programming language
 License: MIT OR Apache-2.0
@@ -28,7 +28,7 @@ Obsoletes: racket9-cached < %{version}-%{package_release}
 %global package_prefix /usr
 %global immutable_cache_root %{package_prefix}/lib/racket/%{version}/compiled-cache
 %global dynamic_cache_root /var/cache/racket/%{version}/compiled
-%global source_sha256 3a0c633eefe21a86a6ab328773b6033767dde0e5a02c94553b180020fbde4054
+%global source_sha256 d2ed2f51777c01b9ea92db3fcee49f7ad5617ec7eebc633c0d845d9e178fb93c
 
 %description
 Racket packaged from a stable source release archive.
@@ -227,13 +227,6 @@ cleanup_posttrans() {
 trap cleanup_posttrans EXIT
 %if "%{cache_mode}" == "postinstall"
 compiled_cache_root="%{dynamic_cache_root}"
-setup_jobs=
-if [ -r /etc/os-release ]; then
-  . /etc/os-release
-  if [ "${ID:-}" = "fedora" ] && [ "${VERSION_ID:-}" = "44" ]; then
-    setup_jobs="-j 1"
-  fi
-fi
 setup_config_source="%{_sysconfdir}/racket/config.rktd"
 setup_config_dir=$(mktemp -d) || exit 1
 [ -n "$setup_config_dir" ] || { echo "mktemp returned an empty Racket setup config directory" >&2; exit 1; }
@@ -247,7 +240,7 @@ grep -F '(compiled-file-system-cache-root . "%{dynamic_cache_root}")' "$setup_co
 # Reset the target before Racket starts so setup and its workers use the same root.
 rm -rf "$compiled_cache_root"
 mkdir -p "$compiled_cache_root"
-if ! %{package_prefix}/bin/racket -U -R "$compiled_cache_root" -X %{package_prefix}/share/racket/collects -G "$setup_config_dir" -N raco -l- raco setup $setup_jobs --no-user -D --no-pkg-deps --no-launcher; then
+if ! %{package_prefix}/bin/racket -U -R "$compiled_cache_root" -X %{package_prefix}/share/racket/collects -G "$setup_config_dir" -N raco -l- raco setup --no-user -D --no-pkg-deps --no-launcher; then
   exit 1
 fi
 cleanup_rhombus_ephemeral
