@@ -1,18 +1,22 @@
 %global cache_mode postinstall
 Name: racket9
-Version: 9.2.3
+Version: 9.2.4
 %global package_system openeuler2403
-%global package_release 3
+%global package_release 1
 Release: %{package_release}.1.postinstall.%{package_system}
 Summary: Racket programming language
 License: MIT OR Apache-2.0
 URL: https://racket-lang.org/
-Source0: https://github.com/CutieDeng/racket/releases/download/v9.2.3/racket-minimal-9.2.3-src.tgz
+Source0: https://github.com/CutieDeng/racket/releases/download/v9.2.4/racket-minimal-9.2.4-src.tgz
 BuildRequires: gcc
 BuildRequires: libffi-devel
 BuildRequires: make
 BuildRequires: ncurses-devel
+# aarch64 Racket runs crypto+TLS on the in-tree rktcrypto engine; only the
+# other architectures still carry OpenSSL pending rktcrypto perf validation.
+%ifnarch aarch64
 BuildRequires: openssl-devel
+%endif
 BuildRequires: perl
 BuildRequires: sqlite-devel
 BuildRequires: zlib-devel
@@ -28,7 +32,7 @@ Obsoletes: racket9-cached < %{version}-%{package_release}
 %global package_prefix /usr
 %global immutable_cache_root %{package_prefix}/lib/racket/%{version}/compiled-cache
 %global dynamic_cache_root /var/cache/racket/%{version}/compiled
-%global source_sha256 d2ed2f51777c01b9ea92db3fcee49f7ad5617ec7eebc633c0d845d9e178fb93c
+%global source_sha256 3e7ef3bbc859fea44f7840dd2b252a54b732ed8ed0caaf40db28c3932b68b99e
 
 %description
 Racket packaged from a stable source release archive.
@@ -48,11 +52,10 @@ if [ -n "%{source_sha256}" ]; then
     exit 1
   fi
 fi
-%setup -q -n racket-9.2.3
+%setup -q -n racket-9.2.4
 
 %build
 sed -i 's|))$|) (default-scope . "installation") (compiled-file-cache-roots . (user system "%{immutable_cache_root}")) (compiled-file-system-cache-root . "%{dynamic_cache_root}"))|' etc/config.rktd
-sed -i 's/"1[.]1"/"3"/g' collects/openssl/libssl.rkt collects/openssl/libcrypto.rkt
 cd src
 ./configure \
   --disable-debug \

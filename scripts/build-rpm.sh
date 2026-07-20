@@ -15,7 +15,7 @@ Build a binary RPM and matching SRPM from the selected concrete spec. All
 mutable paths are named.
 
 Options:
-  --source-archive PATH  Local racket-minimal-9.2.3-src.tgz to copy into rpmbuild.
+  --source-archive PATH  Local racket-minimal-9.2.4-src.tgz to copy into rpmbuild.
   --source-url URL       Source archive URL. Defaults to the generated release URL.
   --artifact-dir PATH    Directory that receives the final .rpm.
   --work-dir PATH        Build work directory for rpmbuild.
