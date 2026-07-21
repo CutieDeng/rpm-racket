@@ -50,8 +50,8 @@ Run from `package-racket` to overwrite the SPEC and scripts:
 racket package-racket.rkt \
   --target rpm-spec \
   --prefix /usr \
-  --rpm-system openeuler2403 \
-  --rpm-release 3 \
+  --rpm-system el9 \
+  --rpm-release 1 \
   --rpm-arch arm64 \
   --rpm-repo-config /Users/cutiedeng/Y2026/M06/D21/package-racket/rpm-repo-config.rktd
 ```
@@ -74,8 +74,8 @@ racket package-racket.rkt \
   --target rpm \
   --target rpm-repo \
   --prefix /usr \
-  --rpm-system openeuler2403 \
-  --rpm-release 3 \
+  --rpm-system el9 \
+  --rpm-release 1 \
   --rpm-arch arm64 \
   --rpm-repo-config /Users/cutiedeng/Y2026/M06/D21/package-racket/rpm-repo-config.rktd
 ```
@@ -89,8 +89,8 @@ source URL:
 scripts/build-rpm.sh \
   --artifact-dir /path/to/artifacts \
   --work-dir /path/to/work \
-  --rpm-system openeuler2403 \
-  --rpm-release 3 \
+  --rpm-system el9 \
+  --rpm-release 1 \
   --rpm-arch arm64 \
   --cache-mode cached \
   --prefix /usr
@@ -100,11 +100,11 @@ Use a local source archive for offline or pinned local builds:
 
 ```sh
 scripts/build-rpm.sh \
-  --source-archive /path/to/racket-minimal-9.2.4-src.tgz \
+  --source-archive /path/to/racket-minimal-9.2.5-src.tgz \
   --artifact-dir /path/to/artifacts \
   --work-dir /path/to/work \
-  --rpm-system openeuler2403 \
-  --rpm-release 3 \
+  --rpm-system el9 \
+  --rpm-release 1 \
   --rpm-arch arm64 \
   --cache-mode postinstall \
   --prefix /usr
@@ -115,14 +115,14 @@ Supported RPM systems are `el9`, `fc40`, `fc43`, `fc44`, `openeuler2203`, and
 production artifacts. Common explicit target examples:
 
 ```sh
---rpm-system el9 --rpm-release 3 --rpm-arch x86_64
---rpm-system fc40 --rpm-release 3 --rpm-arch x86_64
---rpm-system fc43 --rpm-release 3 --rpm-arch x86_64
---rpm-system fc44 --rpm-release 3 --rpm-arch x86_64
---rpm-system openeuler2203 --rpm-release 3 --rpm-arch x86_64
---rpm-system openeuler2203 --rpm-release 3 --rpm-arch arm64
---rpm-system openeuler2403 --rpm-release 3 --rpm-arch x86_64
---rpm-system openeuler2403 --rpm-release 3 --rpm-arch arm64
+--rpm-system el9 --rpm-release 1 --rpm-arch x86_64
+--rpm-system fc40 --rpm-release 1 --rpm-arch x86_64
+--rpm-system fc43 --rpm-release 1 --rpm-arch x86_64
+--rpm-system fc44 --rpm-release 1 --rpm-arch x86_64
+--rpm-system openeuler2203 --rpm-release 1 --rpm-arch x86_64
+--rpm-system openeuler2203 --rpm-release 1 --rpm-arch arm64
+--rpm-system openeuler2403 --rpm-release 1 --rpm-arch x86_64
+--rpm-system openeuler2403 --rpm-release 1 --rpm-arch arm64
 ```
 
 Build the matching SRPM from the generated GitHub Release source URL:
@@ -131,8 +131,8 @@ Build the matching SRPM from the generated GitHub Release source URL:
 scripts/build-srpm.sh \
   --artifact-dir /path/to/artifacts \
   --work-dir /path/to/work \
-  --rpm-system openeuler2403 \
-  --rpm-release 3 \
+  --rpm-system el9 \
+  --rpm-release 1 \
   --rpm-arch arm64 \
   --cache-mode cached \
   --prefix /usr
@@ -142,11 +142,11 @@ Use a local source archive for the matching SRPM:
 
 ```sh
 scripts/build-srpm.sh \
-  --source-archive /path/to/racket-minimal-9.2.4-src.tgz \
+  --source-archive /path/to/racket-minimal-9.2.5-src.tgz \
   --artifact-dir /path/to/artifacts \
   --work-dir /path/to/work \
-  --rpm-system openeuler2403 \
-  --rpm-release 3 \
+  --rpm-system el9 \
+  --rpm-release 1 \
   --rpm-arch arm64 \
   --cache-mode postinstall \
   --prefix /usr
@@ -156,23 +156,23 @@ Validate an existing RPM:
 
 ```sh
 scripts/verify-rpm.sh \
-  --rpm /path/to/artifacts/racket9-9.2.4-3.2.cached.openeuler2403.aarch64.rpm \
-  --rpm-system openeuler2403 \
-  --rpm-release 3 \
+  --rpm /path/to/artifacts/racket9-9.2.5-1.2.cached.el9.aarch64.rpm \
+  --rpm-system el9 \
+  --rpm-release 1 \
   --rpm-arch arm64 \
   --cache-mode cached
 ```
 
 ## Select a channel
 
-Install only the matching `racket9-openeuler2403.repo`
+Install only the matching `racket9-el9.repo`
 into `/etc/yum.repos.d/`. Exactly one channel should be enabled. This
 one-shot command switches to the optional postinstall channel and converges the
 installed package:
 
 ```sh
-dnf --disablerepo=cutiedeng-racket-openeuler2403-cached \
-    --enablerepo=cutiedeng-racket-openeuler2403-postinstall \
+dnf --disablerepo=cutiedeng-racket-el9-cached \
+    --enablerepo=cutiedeng-racket-el9-postinstall \
     --refresh distro-sync racket9
 ```
 

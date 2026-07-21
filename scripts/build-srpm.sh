@@ -14,7 +14,7 @@ Usage: scripts/build-srpm.sh --artifact-dir PATH --work-dir PATH --rpm-system SY
 Build a source RPM from the selected concrete flavor spec.
 
 Options:
-  --source-archive PATH  Local racket-minimal-9.2.4-src.tgz to copy into rpmbuild.
+  --source-archive PATH  Local racket-minimal-9.2.5-src.tgz to copy into rpmbuild.
   --source-url URL       Source archive URL. Defaults to the generated release URL.
   --artifact-dir PATH    Directory that receives the final .src.rpm.
   --work-dir PATH        Build work directory for rpmbuild.
