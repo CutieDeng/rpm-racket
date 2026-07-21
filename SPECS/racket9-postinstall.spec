@@ -2,7 +2,7 @@
 Name: racket9
 Version: 9.2.4
 %global package_system openeuler2403
-%global package_release 2
+%global package_release 3
 Release: %{package_release}.1.postinstall.%{package_system}
 Summary: Racket programming language
 License: MIT OR Apache-2.0
@@ -32,7 +32,7 @@ Obsoletes: racket9-cached < %{version}-%{package_release}
 %global package_prefix /usr
 %global immutable_cache_root %{package_prefix}/lib/racket/%{version}/compiled-cache
 %global dynamic_cache_root /var/cache/racket/%{version}/compiled
-%global source_sha256 ad36e0fbcdbcd577e9f02c7ef6adc3ae09c3733deee16d5f193610d396ec446c
+%global source_sha256 a1b4c1acc5ba2ccd5373c09926afe0ad4ce4010d8564234b15699340f8605956
 
 %description
 Racket packaged from a stable source release archive.
