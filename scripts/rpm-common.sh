@@ -9,12 +9,12 @@ PACKAGE_NAME="$BASE_PACKAGE_NAME"
 PACKAGE_VERSION='9.2.4'
 PACKAGE_SOURCE_VERSION='9.2.4'
 DEFAULT_RPM_SYSTEM='openeuler2403'
-DEFAULT_RPM_RELEASE='1'
+DEFAULT_RPM_RELEASE='2'
 DEFAULT_PREFIX='/usr'
 DEFAULT_CACHE_MODE=cached
 SOURCE_ARCHIVE_NAME='racket-minimal-9.2.4-src.tgz'
 DEFAULT_SOURCE_URL='https://github.com/CutieDeng/racket/releases/download/v9.2.4/racket-minimal-9.2.4-src.tgz'
-SOURCE_SHA256='575d3effebea84a8e0595a134d597c61d1472503ef017cc42bc20d22d8e09202'
+SOURCE_SHA256='ad36e0fbcdbcd577e9f02c7ef6adc3ae09c3733deee16d5f193610d396ec446c'
 die() {
   printf 'ERROR: %s\n' "$*" >&2
   exit 1
