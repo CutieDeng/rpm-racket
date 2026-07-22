@@ -2,7 +2,7 @@
 Name: racket9
 Version: 9.2.5
 %global package_system el9
-%global package_release 2
+%global package_release 3
 Release: %{package_release}.2.cached.%{package_system}
 Summary: Racket programming language
 License: MIT OR Apache-2.0
@@ -32,7 +32,7 @@ Obsoletes: racket9-cached < %{version}-%{package_release}
 %global package_prefix /usr
 %global immutable_cache_root %{package_prefix}/lib/racket/%{version}/compiled-cache
 %global dynamic_cache_root /var/cache/racket/%{version}/compiled
-%global source_sha256 e025b4d06a31b808697104354722016044a2dc40b9b742f29be8ff94b808310f
+%global source_sha256 a44ea98041383b97e1740ff8a809d784fa8c6a6702d815cd9e69683fd7254171
 
 %description
 Racket packaged from a stable source release archive.
@@ -56,6 +56,8 @@ fi
 
 %build
 sed -i 's|))$|) (default-scope . "installation") (compiled-file-cache-roots . (user system "%{immutable_cache_root}")) (compiled-file-system-cache-root . "%{dynamic_cache_root}"))|' etc/config.rktd
+sed -i 's|"../../share/racket/self-catalog"|"%{package_prefix}/share/racket/self-catalog"|' etc/config.rktd
+grep -F '%{package_prefix}/share/racket/self-catalog' etc/config.rktd >/dev/null
 cd src
 ./configure \
   --disable-debug \
