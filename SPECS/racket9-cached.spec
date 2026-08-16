@@ -32,7 +32,7 @@ Obsoletes: racket9-cached < %{version}-%{package_release}
 %global package_prefix /usr
 %global immutable_cache_root %{package_prefix}/lib/racket/%{version}/compiled-cache
 %global dynamic_cache_root /var/cache/racket/%{version}/compiled
-%global source_sha256 37e123e66026b76942a612b9e34b5f2380b44891633c7152e8933360f44fae94
+%global source_sha256 2de98df196ba648fc8ae560e720cb2c01058ecfdd2c48746e6373d122f9a2e6f
 
 %description
 Racket packaged from a stable source release archive.

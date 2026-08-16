@@ -14,7 +14,7 @@ DEFAULT_PREFIX='/usr'
 DEFAULT_CACHE_MODE=cached
 SOURCE_ARCHIVE_NAME='racket-minimal-9.3.1-src.tgz'
 DEFAULT_SOURCE_URL='https://github.com/CutieDeng/racket/releases/download/v9.3.1/racket-minimal-9.3.1-src.tgz'
-SOURCE_SHA256='37e123e66026b76942a612b9e34b5f2380b44891633c7152e8933360f44fae94'
+SOURCE_SHA256='2de98df196ba648fc8ae560e720cb2c01058ecfdd2c48746e6373d122f9a2e6f'
 die() {
   printf 'ERROR: %s\n' "$*" >&2
   exit 1
