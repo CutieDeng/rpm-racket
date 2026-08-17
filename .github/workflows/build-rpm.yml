@@ -326,22 +326,15 @@ jobs:
           [ "$cache_count" -gt 0 ] || { echo "selected compiled cache is empty after RPM install: $cache_root"; exit 1; }
           runtime_collects_cache="$cache_root/usr/share/racket/collects"
           runtime_pkgs_cache="$cache_root/usr/share/racket/pkgs"
-          rhombus_ephemeral_root="/usr/share/racket/pkgs/rhombus-lib/rhombus/private/compiled/ephemeral"
           find "$runtime_collects_cache" -path '*/compiled/*.zo' -type f -print -quit | grep -q . \
             || { echo "runtime-keyed collects cache is empty after RPM install: $runtime_collects_cache"; exit 1; }
           find "$runtime_pkgs_cache" -path '*/compiled/*.zo' -type f -print -quit | grep -q . \
             || { echo "runtime-keyed package cache is empty after RPM install: $runtime_pkgs_cache"; exit 1; }
-          [ ! -e "$rhombus_ephemeral_root" ] || { echo "Rhombus ephemeral cache was installed: $rhombus_ephemeral_root"; exit 1; }
           racket -e '(displayln (version))' | grep -F "$PACKAGE_VERSION"
           racket -e '(displayln f"rpm-ci-ok")' | grep -F 'rpm-ci-ok'
           racket -e '(require readline/readline) (displayln f"rpm-readline-ok")' | grep -F 'rpm-readline-ok'
           empty_home=$(mktemp -d)
           HOME="$empty_home" racket -e '(require racket/list racket/match racket/file) (displayln f"rpm-empty-home-ok")' | grep -F 'rpm-empty-home-ok'
-          HOME="$empty_home" timeout 30s rhombus --version | grep -F 'Rhombus'
-          HOME="$empty_home" timeout 30s rhombus -e 'println("rpm-rhombus-ok")' | grep -F 'rpm-rhombus-ok'
-          rm -rf "$empty_home"
-          empty_home=$(mktemp -d)
-          HOME="$empty_home" timeout 30s rhombus -e 'println("rpm-rhombus-fresh-home-ok")' | grep -F 'rpm-rhombus-fresh-home-ok'
           rm -rf "$empty_home"
           raco pkg show --all >/tmp/raco-pkgs.txt
           rpm -V "$PACKAGE_NAME"
@@ -484,7 +477,6 @@ jobs:
             local empty_home
             empty_home=$(mktemp -d)
             HOME="$empty_home" /usr/bin/racket -e '(require racket/list racket/match) (displayln "rpm-cached-transaction-ok")' | grep -F rpm-cached-transaction-ok
-            HOME="$empty_home" /usr/bin/rhombus --version | grep -F Rhombus
             rm -rf "$empty_home"
           }
           legacy_root="$GITHUB_WORKSPACE/legacy-rpm"

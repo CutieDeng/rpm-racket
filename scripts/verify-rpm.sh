@@ -97,9 +97,6 @@ else
   printf '%s\n' "$payload" | grep -F "$runtime_pkgs_cache/" | grep -E '[.]zo$' >/dev/null \
     || die "cached RPM payload does not include runtime-keyed package cache .zo files"
 fi
-if printf '%s\n' "$payload" | grep -F '/compiled/ephemeral/' >/dev/null; then
-  die "RPM payload unexpectedly includes Rhombus ephemeral cache"
-fi
 provides=$(rpm -qp --provides "$RPM_PATH")
 printf '%s\n' "$provides" | grep -F "$BASE_PACKAGE_NAME(cache-mode-$CACHE_MODE)" >/dev/null \
   || die "RPM metadata is missing cache-mode capability"
@@ -111,8 +108,6 @@ if [ "$CACHE_MODE" = postinstall ]; then
     || die "RPM scriptlets do not isolate setup from installed cache-root policy"
   printf '%s\n' "$scripts" | grep -F 'rm -rf "$compiled_cache_root"' >/dev/null \
     || die "RPM scriptlets do not reset the compiled cache before Racket starts"
-  printf '%s\n' "$scripts" | grep -F 'package-racket-rhombus-cache' >/dev/null \
-    || die "RPM scriptlets do not warm Rhombus into the dynamic cache"
 else
   if printf '%s\n' "$scripts" | grep -F 'raco setup' >/dev/null; then
     die "cached RPM scriptlets unexpectedly build the system compiled cache"
@@ -121,8 +116,6 @@ fi
 if printf '%s\n' "$scripts" | grep -E -- '--system|--reset-cache|--unsafe-delete-all' >/dev/null; then
   die "RPM scriptlets retain in-process compiled-cache reset options"
 fi
-printf '%s\n' "$scripts" | grep -F 'cleanup_rhombus_ephemeral' >/dev/null \
-  || die "RPM scriptlets do not clean Rhombus ephemeral compiled state"
 printf '%s\n' "$scripts" | grep -F "rm -rf \"/var/cache/racket/$PACKAGE_VERSION/compiled\"" >/dev/null \
   || die "RPM scriptlets do not purge the versioned dynamic cache directory"
 printf '%s\n' "$scripts" | grep -F "rm -f \"/var/cache/racket/$PACKAGE_VERSION/racket-compiled-cache.log\"" >/dev/null \
