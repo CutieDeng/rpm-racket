@@ -2,7 +2,7 @@
 Name: racket9
 Version: 9.3.1
 %global package_system fc40
-%global package_release 1
+%global package_release 2
 Release: %{package_release}.2.cached.%{package_system}
 Summary: Racket programming language
 License: MIT OR Apache-2.0
