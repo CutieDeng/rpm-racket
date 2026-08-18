@@ -100,7 +100,7 @@ Use a local source archive for offline or pinned local builds:
 
 ```sh
 scripts/build-rpm.sh \
-  --source-archive /path/to/racket-minimal-9.3.2-src.tgz \
+  --source-archive /path/to/racket-minimal-9.3.3-src.tgz \
   --artifact-dir /path/to/artifacts \
   --work-dir /path/to/work \
   --rpm-system el9 \
@@ -142,7 +142,7 @@ Use a local source archive for the matching SRPM:
 
 ```sh
 scripts/build-srpm.sh \
-  --source-archive /path/to/racket-minimal-9.3.2-src.tgz \
+  --source-archive /path/to/racket-minimal-9.3.3-src.tgz \
   --artifact-dir /path/to/artifacts \
   --work-dir /path/to/work \
   --rpm-system el9 \
@@ -156,7 +156,7 @@ Validate an existing RPM:
 
 ```sh
 scripts/verify-rpm.sh \
-  --rpm /path/to/artifacts/racket9-9.3.2-1.2.cached.el9.aarch64.rpm \
+  --rpm /path/to/artifacts/racket9-9.3.3-1.2.cached.el9.aarch64.rpm \
   --rpm-system el9 \
   --rpm-release 1 \
   --rpm-arch arm64 \
