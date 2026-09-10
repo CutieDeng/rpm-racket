@@ -19,7 +19,7 @@ Options:
   --source-url URL       Source archive URL. Defaults to the generated release URL.
   --artifact-dir PATH    Directory that receives the final .rpm.
   --work-dir PATH        Build work directory for rpmbuild.
-  --rpm-system SYSTEM    el9, fc40, fc43, fc44, openeuler2203, or openeuler2403.
+  --rpm-system SYSTEM    el9, fc40, fc41, fc43, fc44, openeuler2203, or openeuler2403.
   --rpm-release RELEASE  Package release base, for example 1. The system suffix is appended separately.
   --cache-mode MODE      cached or postinstall. Defaults to cached.
   --prefix PATH          Install prefix inside the package. Defaults to generated /usr.

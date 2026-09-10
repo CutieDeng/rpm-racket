@@ -9,7 +9,7 @@ PACKAGE_NAME="$BASE_PACKAGE_NAME"
 PACKAGE_VERSION='9.3.5'
 PACKAGE_SOURCE_VERSION='9.3.5'
 DEFAULT_RPM_SYSTEM='el9'
-DEFAULT_RPM_RELEASE='1'
+DEFAULT_RPM_RELEASE='2'
 DEFAULT_PREFIX='/usr'
 DEFAULT_CACHE_MODE=cached
 SOURCE_ARCHIVE_NAME='racket-minimal-9.3.5-src.tgz'
@@ -100,8 +100,8 @@ normalize_arch() {
 
 validate_rpm_system() {
   case "$1" in
-    el9|fc40|fc43|fc44|openeuler2203|openeuler2403) ;;
-    *) die "rpm system must be el9, fc40, fc43, fc44, openeuler2203, or openeuler2403: $1" ;;
+    el9|fc40|fc41|fc43|fc44|openeuler2203|openeuler2403) ;;
+    *) die "rpm system must be el9, fc40, fc41, fc43, fc44, openeuler2203, or openeuler2403: $1" ;;
   esac
 }
 

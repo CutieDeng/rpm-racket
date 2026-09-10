@@ -26,7 +26,7 @@ jobs:
         include:
           - id: 'el9-x86_64-cached'
             rpm_system: 'el9'
-            rpm_release: '1'
+            rpm_release: '2'
             rpm_arch: 'x86_64'
             cache_mode: 'cached'
             package_name: 'racket9'
@@ -37,7 +37,7 @@ jobs:
             setup_packages: 'bash diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'el9-x86_64-postinstall'
             rpm_system: 'el9'
-            rpm_release: '1'
+            rpm_release: '2'
             rpm_arch: 'x86_64'
             cache_mode: 'postinstall'
             package_name: 'racket9'
@@ -48,7 +48,7 @@ jobs:
             setup_packages: 'bash diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'fc40-x86_64-cached'
             rpm_system: 'fc40'
-            rpm_release: '1'
+            rpm_release: '2'
             rpm_arch: 'x86_64'
             cache_mode: 'cached'
             package_name: 'racket9'
@@ -59,7 +59,7 @@ jobs:
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'fc40-x86_64-postinstall'
             rpm_system: 'fc40'
-            rpm_release: '1'
+            rpm_release: '2'
             rpm_arch: 'x86_64'
             cache_mode: 'postinstall'
             package_name: 'racket9'
@@ -68,9 +68,31 @@ jobs:
             jobs: 2
             artifact_name: 'rpm-fc40-x86_64-postinstall'
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
+          - id: 'fc41-x86_64-cached'
+            rpm_system: 'fc41'
+            rpm_release: '2'
+            rpm_arch: 'x86_64'
+            cache_mode: 'cached'
+            package_name: 'racket9'
+            runner: 'ubuntu-24.04'
+            container: 'fedora:41'
+            jobs: 2
+            artifact_name: 'rpm-fc41-x86_64-cached'
+            setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
+          - id: 'fc41-x86_64-postinstall'
+            rpm_system: 'fc41'
+            rpm_release: '2'
+            rpm_arch: 'x86_64'
+            cache_mode: 'postinstall'
+            package_name: 'racket9'
+            runner: 'ubuntu-24.04'
+            container: 'fedora:41'
+            jobs: 2
+            artifact_name: 'rpm-fc41-x86_64-postinstall'
+            setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'fc43-x86_64-cached'
             rpm_system: 'fc43'
-            rpm_release: '1'
+            rpm_release: '2'
             rpm_arch: 'x86_64'
             cache_mode: 'cached'
             package_name: 'racket9'
@@ -81,7 +103,7 @@ jobs:
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'fc43-x86_64-postinstall'
             rpm_system: 'fc43'
-            rpm_release: '1'
+            rpm_release: '2'
             rpm_arch: 'x86_64'
             cache_mode: 'postinstall'
             package_name: 'racket9'
@@ -92,7 +114,7 @@ jobs:
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'fc44-x86_64-cached'
             rpm_system: 'fc44'
-            rpm_release: '1'
+            rpm_release: '2'
             rpm_arch: 'x86_64'
             cache_mode: 'cached'
             package_name: 'racket9'
@@ -103,7 +125,7 @@ jobs:
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'fc44-x86_64-postinstall'
             rpm_system: 'fc44'
-            rpm_release: '1'
+            rpm_release: '2'
             rpm_arch: 'x86_64'
             cache_mode: 'postinstall'
             package_name: 'racket9'
@@ -114,7 +136,7 @@ jobs:
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'openeuler2203-aarch64-cached'
             rpm_system: 'openeuler2203'
-            rpm_release: '1'
+            rpm_release: '2'
             rpm_arch: 'aarch64'
             cache_mode: 'cached'
             package_name: 'racket9'
@@ -125,7 +147,7 @@ jobs:
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'openeuler2203-aarch64-postinstall'
             rpm_system: 'openeuler2203'
-            rpm_release: '1'
+            rpm_release: '2'
             rpm_arch: 'aarch64'
             cache_mode: 'postinstall'
             package_name: 'racket9'
@@ -136,7 +158,7 @@ jobs:
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'openeuler2203-x86_64-cached'
             rpm_system: 'openeuler2203'
-            rpm_release: '1'
+            rpm_release: '2'
             rpm_arch: 'x86_64'
             cache_mode: 'cached'
             package_name: 'racket9'
@@ -147,7 +169,7 @@ jobs:
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'openeuler2203-x86_64-postinstall'
             rpm_system: 'openeuler2203'
-            rpm_release: '1'
+            rpm_release: '2'
             rpm_arch: 'x86_64'
             cache_mode: 'postinstall'
             package_name: 'racket9'
@@ -158,7 +180,7 @@ jobs:
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'openeuler2403-aarch64-cached'
             rpm_system: 'openeuler2403'
-            rpm_release: '1'
+            rpm_release: '2'
             rpm_arch: 'aarch64'
             cache_mode: 'cached'
             package_name: 'racket9'
@@ -169,7 +191,7 @@ jobs:
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'openeuler2403-aarch64-postinstall'
             rpm_system: 'openeuler2403'
-            rpm_release: '1'
+            rpm_release: '2'
             rpm_arch: 'aarch64'
             cache_mode: 'postinstall'
             package_name: 'racket9'
@@ -180,7 +202,7 @@ jobs:
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'openeuler2403-x86_64-cached'
             rpm_system: 'openeuler2403'
-            rpm_release: '1'
+            rpm_release: '2'
             rpm_arch: 'x86_64'
             cache_mode: 'cached'
             package_name: 'racket9'
@@ -191,7 +213,7 @@ jobs:
             setup_packages: 'bash coreutils curl diffutils file findutils gcc grep gzip libffi-devel make ncurses-devel openssl-devel perl rpm rpm-build sed sqlite-devel tar which zlib-devel'
           - id: 'openeuler2403-x86_64-postinstall'
             rpm_system: 'openeuler2403'
-            rpm_release: '1'
+            rpm_release: '2'
             rpm_arch: 'x86_64'
             cache_mode: 'postinstall'
             package_name: 'racket9'
@@ -224,6 +246,41 @@ jobs:
           grep -F '[cutiedeng-racket-${{ matrix.rpm_system }}-postinstall]' "$repo_file"
           test ! -d repo
 
+      - name: Check container matches target system
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected_ids=''
+          expected_version_prefix=''
+          case "${{ matrix.rpm_system }}" in
+            el9) expected_ids='centos rhel rocky almalinux'; expected_version_prefix='9' ;;
+            fc40) expected_ids='fedora'; expected_version_prefix='40' ;;
+            fc41) expected_ids='fedora'; expected_version_prefix='41' ;;
+            fc43) expected_ids='fedora'; expected_version_prefix='43' ;;
+            fc44) expected_ids='fedora'; expected_version_prefix='44' ;;
+            openeuler2203) expected_ids='openeuler'; expected_version_prefix='22.03' ;;
+            openeuler2403) expected_ids='openeuler'; expected_version_prefix='24.03' ;;
+            *) echo 'no os-release expectation for rpm system: ${{ matrix.rpm_system }}'; exit 1 ;;
+          esac
+          test -r /etc/os-release || { echo '/etc/os-release is missing in the build container'; exit 1; }
+          . /etc/os-release
+          actual_id=$(printf '%s' "${ID:-}" | tr '[:upper:]' '[:lower:]')
+          id_ok=0
+          for candidate in $expected_ids; do
+            if [ "$actual_id" = "$candidate" ]; then
+              id_ok=1
+            fi
+          done
+          if [ "$id_ok" -ne 1 ]; then
+            printf 'container os-release ID %s does not match rpm system ${{ matrix.rpm_system }} (expected one of: %s)\n' "$actual_id" "$expected_ids"
+            exit 1
+          fi
+          case "${VERSION_ID:-}" in
+            "$expected_version_prefix"|"$expected_version_prefix".*|"$expected_version_prefix"-*) ;;
+            *) printf 'container os-release VERSION_ID %s does not match rpm system ${{ matrix.rpm_system }} (expected %s)\n' "${VERSION_ID:-}" "$expected_version_prefix"; exit 1 ;;
+          esac
+          printf 'container %s %s matches rpm system ${{ matrix.rpm_system }}\n' "$actual_id" "${VERSION_ID:-}"
+
       - name: Install RPM build dependencies
         shell: bash
         run: |
@@ -244,7 +301,20 @@ jobs:
               dnf config-manager --set-enabled crb || true
             fi
           fi
-          $pm -y install $packages
+          install_with_retry() {
+            local attempt
+            for attempt in 1 2 3; do
+              if $pm -y install "$@"; then
+                return 0
+              fi
+              printf 'package install attempt %s/3 failed; cleaning metadata and retrying\n' "$attempt"
+              $pm clean all >/dev/null 2>&1 || true
+              sleep $((attempt * 15))
+            done
+            printf 'package install failed after 3 attempts: %s\n' "$*"
+            return 1
+          }
+          install_with_retry $packages
 
       - name: Build RPM
         shell: bash
@@ -333,6 +403,9 @@ jobs:
           racket -e '(displayln (version))' | grep -F "$PACKAGE_VERSION"
           racket -e '(displayln f"rpm-ci-ok")' | grep -F 'rpm-ci-ok'
           racket -e '(require readline/readline) (displayln f"rpm-readline-ok")' | grep -F 'rpm-readline-ok'
+          racket -e '(require openssl) (unless ssl-available? (error "openssl collection reports ssl unavailable")) (void (ssl-make-client-context)) (displayln "rpm-ssl-ok")' | grep -F 'rpm-ssl-ok'
+          racket -e '(require openssl/libcrypto openssl/libssl) (when (or libcrypto libssl) (error "crypto must run on the in-tree rktcrypto engine, not on a loaded OpenSSL")) (displayln "rpm-rktcrypto-backend-ok")' | grep -F 'rpm-rktcrypto-backend-ok'
+          racket -e '(require db/private/pre) (unless (sqlite3-available?) (error "core sqlite3 support is unavailable: libsqlite3 did not load")) (displayln "rpm-sqlite-ok")' | grep -F 'rpm-sqlite-ok'
           empty_home=$(mktemp -d)
           HOME="$empty_home" racket -e '(require racket/list racket/match racket/file) (displayln f"rpm-empty-home-ok")' | grep -F 'rpm-empty-home-ok'
           rm -rf "$empty_home"
@@ -362,49 +435,55 @@ jobs:
         include:
           - id: 'el9-x86_64'
             rpm_system: 'el9'
-            rpm_release: '1'
+            rpm_release: '2'
             rpm_arch: 'x86_64'
             runner: 'ubuntu-24.04'
             container: 'quay.io/centos/centos:stream9'
           - id: 'fc40-x86_64'
             rpm_system: 'fc40'
-            rpm_release: '1'
+            rpm_release: '2'
             rpm_arch: 'x86_64'
             runner: 'ubuntu-24.04'
             container: 'fedora:40'
+          - id: 'fc41-x86_64'
+            rpm_system: 'fc41'
+            rpm_release: '2'
+            rpm_arch: 'x86_64'
+            runner: 'ubuntu-24.04'
+            container: 'fedora:41'
           - id: 'fc43-x86_64'
             rpm_system: 'fc43'
-            rpm_release: '1'
+            rpm_release: '2'
             rpm_arch: 'x86_64'
             runner: 'ubuntu-24.04'
             container: 'fedora:43'
           - id: 'fc44-x86_64'
             rpm_system: 'fc44'
-            rpm_release: '1'
+            rpm_release: '2'
             rpm_arch: 'x86_64'
             runner: 'ubuntu-24.04'
             container: 'fedora:44'
           - id: 'openeuler2203-aarch64'
             rpm_system: 'openeuler2203'
-            rpm_release: '1'
+            rpm_release: '2'
             rpm_arch: 'aarch64'
             runner: 'ubuntu-24.04-arm'
             container: 'openeuler/openeuler:22.03-lts'
           - id: 'openeuler2203-x86_64'
             rpm_system: 'openeuler2203'
-            rpm_release: '1'
+            rpm_release: '2'
             rpm_arch: 'x86_64'
             runner: 'ubuntu-24.04'
             container: 'openeuler/openeuler:22.03-lts'
           - id: 'openeuler2403-aarch64'
             rpm_system: 'openeuler2403'
-            rpm_release: '1'
+            rpm_release: '2'
             rpm_arch: 'aarch64'
             runner: 'ubuntu-24.04-arm'
             container: 'openeuler/openeuler:24.03-lts'
           - id: 'openeuler2403-x86_64'
             rpm_system: 'openeuler2403'
-            rpm_release: '1'
+            rpm_release: '2'
             rpm_arch: 'x86_64'
             runner: 'ubuntu-24.04'
             container: 'openeuler/openeuler:24.03-lts'
@@ -552,7 +631,7 @@ jobs:
       - name: Build system-isolated channel repositories
         shell: bash
         env:
-          RELEASE_TAG: 'v9.3.5-r1'
+          RELEASE_TAG: 'v9.3.5-r2'
         run: |
           set -euo pipefail
           sudo apt-get update
@@ -562,7 +641,7 @@ jobs:
           mkdir -p "$site_root"
           cp racket9-*.repo "$site_root/"
           mapfile -t rpm_files < <(find "$GITHUB_WORKSPACE/release-assets" -maxdepth 2 -name '*.rpm' ! -name '*.src.rpm' -type f | sort)
-          [ "${#rpm_files[@]}" -eq 16 ] || { echo 'unexpected binary RPM count for repository publication'; exit 1; }
+          [ "${#rpm_files[@]}" -eq 18 ] || { echo 'unexpected binary RPM count for repository publication'; exit 1; }
           for rpm_file in "${rpm_files[@]}"; do
             release=$(rpm -qp --qf '%{RELEASE}' "$rpm_file")
             arch=$(rpm -qp --qf '%{ARCH}' "$rpm_file")
@@ -573,7 +652,7 @@ jobs:
               *) echo "unrecognized cache-mode Release: $release"; exit 1 ;;
             esac
             case "$system" in
-              el9|fc40|fc43|fc44|openeuler2203|openeuler2403) ;;
+              el9|fc40|fc41|fc43|fc44|openeuler2203|openeuler2403) ;;
               *) echo "unsupported RPM system in Release: $release"; exit 1 ;;
             esac
             repo_root="$site_root/repo/$cache_mode/$system/$arch"
@@ -609,13 +688,13 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
-          RELEASE_TAG: 'v9.3.5-r1'
-          RELEASE_NAME: 'Racket 9.3.5 RPM packages R1'
+          RELEASE_TAG: 'v9.3.5-r2'
+          RELEASE_NAME: 'Racket 9.3.5 RPM packages R2'
           CREATE_RELEASE: 'true'
           BUILD_SHA: ${{ github.sha }}
           PACKAGE_NAME: 'racket9'
           PACKAGE_VERSION: '9.3.5'
-          EXPECTED_RPM_COUNT: 16
+          EXPECTED_RPM_COUNT: 18
         run: |
           set -euo pipefail
           command -v gh >/dev/null 2>&1 || { echo 'gh CLI is required on the publish runner'; exit 1; }
