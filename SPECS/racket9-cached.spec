@@ -1,13 +1,13 @@
 %global cache_mode cached
 Name: racket9
-Version: 9.3.13
+Version: 9.3.14
 %global package_system el9
 %global package_release 1
 Release: %{package_release}.2.cached.%{package_system}
 Summary: Racket programming language
 License: MIT OR Apache-2.0
 URL: https://racket-lang.org/
-Source0: https://github.com/CutieDeng/racket/releases/download/release-9.3.13/racket-minimal-9.3.13-src.tgz
+Source0: https://github.com/CutieDeng/racket/releases/download/release-9.3.14/racket-minimal-9.3.14-src.tgz
 BuildRequires: gcc
 BuildRequires: libffi-devel
 BuildRequires: make
@@ -32,7 +32,7 @@ Obsoletes: racket9-cached < %{version}-%{package_release}
 %global package_prefix /usr
 %global immutable_cache_root %{package_prefix}/lib/racket/%{version}/compiled-cache
 %global dynamic_cache_root /var/cache/racket/%{version}/compiled
-%global source_sha256 bdf20fa23be83762013376d764884f08070175a3f35b6a6ebc62a5a66f0a15d0
+%global source_sha256 44cef938306bb43c8ce88835baf5e939594c105cad56718f7d980ed725383c6f
 
 %description
 Racket packaged from a stable source release archive.
@@ -52,7 +52,7 @@ if [ -n "%{source_sha256}" ]; then
     exit 1
   fi
 fi
-%setup -q -n racket-9.3.13
+%setup -q -n racket-9.3.14
 
 %build
 sed -i 's|))$|) (default-scope . "installation") (compiled-file-cache-roots . (user system "%{immutable_cache_root}")) (compiled-file-system-cache-root . "%{dynamic_cache_root}"))|' etc/config.rktd
