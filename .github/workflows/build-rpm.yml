@@ -360,7 +360,7 @@ jobs:
         shell: bash
         env:
           PACKAGE_NAME: ${{ matrix.package_name }}
-          PACKAGE_VERSION: '9.3.12'
+          PACKAGE_VERSION: '9.3.13'
           CACHE_MODE: ${{ matrix.cache_mode }}
         run: |
           set -euo pipefail
@@ -520,7 +520,7 @@ jobs:
         shell: bash
         env:
           PACKAGE_NAME: 'racket9'
-          PACKAGE_VERSION: '9.3.12'
+          PACKAGE_VERSION: '9.3.13'
           RPM_SYSTEM: ${{ matrix.rpm_system }}
           RPM_RELEASE: ${{ matrix.rpm_release }}
           RPM_ARCH: ${{ matrix.rpm_arch }}
@@ -631,7 +631,7 @@ jobs:
       - name: Build system-isolated channel repositories
         shell: bash
         env:
-          RELEASE_TAG: 'release-9.3.12-r1'
+          RELEASE_TAG: 'release-9.3.13-r1'
         run: |
           set -euo pipefail
           sudo apt-get update
@@ -688,12 +688,12 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
-          RELEASE_TAG: 'release-9.3.12-r1'
-          RELEASE_NAME: 'Racket 9.3.12 RPM packages R1'
+          RELEASE_TAG: 'release-9.3.13-r1'
+          RELEASE_NAME: 'Racket 9.3.13 RPM packages R1'
           CREATE_RELEASE: 'true'
           BUILD_SHA: ${{ github.sha }}
           PACKAGE_NAME: 'racket9'
-          PACKAGE_VERSION: '9.3.12'
+          PACKAGE_VERSION: '9.3.13'
           EXPECTED_RPM_COUNT: 18
         run: |
           set -euo pipefail
