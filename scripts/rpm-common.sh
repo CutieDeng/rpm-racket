@@ -6,15 +6,15 @@ set -euo pipefail
 
 BASE_PACKAGE_NAME='racket9'
 PACKAGE_NAME="$BASE_PACKAGE_NAME"
-PACKAGE_VERSION='9.3.5'
-PACKAGE_SOURCE_VERSION='9.3.5'
+PACKAGE_VERSION='9.3.12'
+PACKAGE_SOURCE_VERSION='9.3.12'
 DEFAULT_RPM_SYSTEM='el9'
-DEFAULT_RPM_RELEASE='2'
+DEFAULT_RPM_RELEASE='1'
 DEFAULT_PREFIX='/usr'
 DEFAULT_CACHE_MODE=cached
-SOURCE_ARCHIVE_NAME='racket-minimal-9.3.5-src.tgz'
-DEFAULT_SOURCE_URL='https://github.com/CutieDeng/racket/releases/download/v9.3.5/racket-minimal-9.3.5-src.tgz'
-SOURCE_SHA256='dac88d1a7f1c104de93b31f385bdebe21c43cfbd9f3ca03c0d68050fae6e6663'
+SOURCE_ARCHIVE_NAME='racket-minimal-9.3.12-src.tgz'
+DEFAULT_SOURCE_URL='https://github.com/CutieDeng/racket/releases/download/release-9.3.12/racket-minimal-9.3.12-src.tgz'
+SOURCE_SHA256='82fc5372b8826132a947ba62ba84d9dcf4531cc6919cbcc1b370cadaa286639c'
 die() {
   printf 'ERROR: %s\n' "$*" >&2
   exit 1

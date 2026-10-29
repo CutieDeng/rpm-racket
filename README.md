@@ -51,9 +51,9 @@ racket package-racket.rkt \
   --target rpm-spec \
   --prefix /usr \
   --rpm-system el9 \
-  --rpm-release 2 \
+  --rpm-release 1 \
   --rpm-arch arm64 \
-  --rpm-repo-config /Users/cutiedeng/Y2026/M06/D21/package-racket/rpm-repo-config.rktd
+  --rpm-repo-config /home/runner/work/package-racket/package-racket/package-racket/rpm-repo-config.rktd
 ```
 
 Run from `package-racket` to overwrite the generated RPM CI workflow:
@@ -62,8 +62,8 @@ Run from `package-racket` to overwrite the generated RPM CI workflow:
 racket package-racket.rkt \
   --target rpm-ci \
   --prefix /usr \
-  --rpm-repo-config /Users/cutiedeng/Y2026/M06/D21/package-racket/rpm-repo-config.rktd \
-  --rpm-ci-config /Users/cutiedeng/Y2026/M06/D21/package-racket/rpm-ci-config.rktd
+  --rpm-repo-config /home/runner/work/package-racket/package-racket/package-racket/rpm-repo-config.rktd \
+  --rpm-ci-config /home/runner/work/package-racket/package-racket/package-racket/rpm-ci-config.rktd
 ```
 
 On a supported Linux builder, build both flavors and update both repository
@@ -75,9 +75,9 @@ racket package-racket.rkt \
   --target rpm-repo \
   --prefix /usr \
   --rpm-system el9 \
-  --rpm-release 2 \
+  --rpm-release 1 \
   --rpm-arch arm64 \
-  --rpm-repo-config /Users/cutiedeng/Y2026/M06/D21/package-racket/rpm-repo-config.rktd
+  --rpm-repo-config /home/runner/work/package-racket/package-racket/package-racket/rpm-repo-config.rktd
 ```
 
 ## Build
@@ -90,7 +90,7 @@ scripts/build-rpm.sh \
   --artifact-dir /path/to/artifacts \
   --work-dir /path/to/work \
   --rpm-system el9 \
-  --rpm-release 2 \
+  --rpm-release 1 \
   --rpm-arch arm64 \
   --cache-mode cached \
   --prefix /usr
@@ -100,11 +100,11 @@ Use a local source archive for offline or pinned local builds:
 
 ```sh
 scripts/build-rpm.sh \
-  --source-archive /path/to/racket-minimal-9.3.5-src.tgz \
+  --source-archive /path/to/racket-minimal-9.3.12-src.tgz \
   --artifact-dir /path/to/artifacts \
   --work-dir /path/to/work \
   --rpm-system el9 \
-  --rpm-release 2 \
+  --rpm-release 1 \
   --rpm-arch arm64 \
   --cache-mode postinstall \
   --prefix /usr
@@ -116,15 +116,15 @@ intentionally rejected for production artifacts. Common explicit target
 examples:
 
 ```sh
---rpm-system el9 --rpm-release 2 --rpm-arch x86_64
---rpm-system fc40 --rpm-release 2 --rpm-arch x86_64
---rpm-system fc41 --rpm-release 2 --rpm-arch x86_64
---rpm-system fc43 --rpm-release 2 --rpm-arch x86_64
---rpm-system fc44 --rpm-release 2 --rpm-arch x86_64
---rpm-system openeuler2203 --rpm-release 2 --rpm-arch x86_64
---rpm-system openeuler2203 --rpm-release 2 --rpm-arch arm64
---rpm-system openeuler2403 --rpm-release 2 --rpm-arch x86_64
---rpm-system openeuler2403 --rpm-release 2 --rpm-arch arm64
+--rpm-system el9 --rpm-release 1 --rpm-arch x86_64
+--rpm-system fc40 --rpm-release 1 --rpm-arch x86_64
+--rpm-system fc41 --rpm-release 1 --rpm-arch x86_64
+--rpm-system fc43 --rpm-release 1 --rpm-arch x86_64
+--rpm-system fc44 --rpm-release 1 --rpm-arch x86_64
+--rpm-system openeuler2203 --rpm-release 1 --rpm-arch x86_64
+--rpm-system openeuler2203 --rpm-release 1 --rpm-arch arm64
+--rpm-system openeuler2403 --rpm-release 1 --rpm-arch x86_64
+--rpm-system openeuler2403 --rpm-release 1 --rpm-arch arm64
 ```
 
 Build the matching SRPM from the generated GitHub Release source URL:
@@ -134,7 +134,7 @@ scripts/build-srpm.sh \
   --artifact-dir /path/to/artifacts \
   --work-dir /path/to/work \
   --rpm-system el9 \
-  --rpm-release 2 \
+  --rpm-release 1 \
   --rpm-arch arm64 \
   --cache-mode cached \
   --prefix /usr
@@ -144,11 +144,11 @@ Use a local source archive for the matching SRPM:
 
 ```sh
 scripts/build-srpm.sh \
-  --source-archive /path/to/racket-minimal-9.3.5-src.tgz \
+  --source-archive /path/to/racket-minimal-9.3.12-src.tgz \
   --artifact-dir /path/to/artifacts \
   --work-dir /path/to/work \
   --rpm-system el9 \
-  --rpm-release 2 \
+  --rpm-release 1 \
   --rpm-arch arm64 \
   --cache-mode postinstall \
   --prefix /usr
@@ -158,9 +158,9 @@ Validate an existing RPM:
 
 ```sh
 scripts/verify-rpm.sh \
-  --rpm /path/to/artifacts/racket9-9.3.5-2.2.cached.el9.aarch64.rpm \
+  --rpm /path/to/artifacts/racket9-9.3.12-1.2.cached.el9.aarch64.rpm \
   --rpm-system el9 \
-  --rpm-release 2 \
+  --rpm-release 1 \
   --rpm-arch arm64 \
   --cache-mode cached
 ```
